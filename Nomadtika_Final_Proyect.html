@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotation System – Nomadtika v3.2</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --primary: #111827;      
+    --accent: #009B77;       
+    --accent-hover: #007a5e;
+    --bg: #FFFFFF;           
+    --bg-alt: #F9FAFB;       
+    --border: #E5E7EB;
+    --text: #374151;
+    --text-light: #6B7280;
+    --danger: #EF4444;
+    --danger-dark: #991B1B;
+    --success: #10B981;
+    --info: #3B82F6;
+    --warning: #F59E0B;
+    
+    --radius: 8px;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --font-main: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-main);
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* ── LAYOUT ── */
+.app-container { display: flex; width: 100%; height: 100%; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+    width: 260px;
+    background: #F3F4F6;
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+.brand {
+    font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 40px;
+    display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em;
+}
+.brand span { color: var(--accent); }
+.nav-menu { display: flex; flex-direction: column; gap: 6px; }
+.nav-item {
+    background: transparent; border: none; text-align: left; padding: 12px 16px;
+    border-radius: var(--radius); color: var(--text-light); font-weight: 500;
+    font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
+}
+.nav-item:hover:not(.locked) { background: #E5E7EB; color: var(--primary); }
+.nav-item.active { background: var(--primary); color: #fff; box-shadow: var(--shadow); }
+.nav-item.locked { opacity: 0.5; cursor: not-allowed; }
+
+/* Mobile Menu */
+.mobile-header {
+    display: none;
+    background: var(--primary);
+    color: #fff;
+    padding: 16px 20px;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+.menu-toggle {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+}
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 98;
+}
+.mobile-overlay.active {
+    display: block;
+}
+
+/* ── MAIN ── */
+.main-content {
+    flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); position: relative;
+}
+h2 { font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; letter-spacing: -0.02em; }
+h3 { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── UI COMPONENTS ── */
+.card {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+input, select, textarea {
+    padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.9rem; transition: 0.2s; background: #fff; font-family: var(--font-main);
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(0,155,119,0.1); }
+input.error, select.error { border-color: var(--danger); }
+.error-message {
+    font-size: 0.75rem;
+    color: var(--danger);
+    margin-top: 4px;
+}
+
+/* File Upload */
+.file-upload-wrapper {
+    border: 2px dashed var(--border); border-radius: 8px; padding: 24px;
+    text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg-alt);
+}
+.file-upload-wrapper:hover { border-color: var(--accent); background: #F0FDF4; }
+.file-name { margin-top: 8px; font-size: 0.85rem; color: var(--accent); font-weight: 600; }
+
+/* Buttons */
+.btn {
+    padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
+    border: none; cursor: pointer; transition: 0.2s; display: inline-flex;
+    align-items: center; justify-content: center; gap: 8px;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--text); background: var(--bg-alt); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-warning { background: var(--warning); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+/* Search & Filters Section */
+.search-filter-section {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.search-bar {
+    position: relative;
+    margin-bottom: 16px;
+}
+.search-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background: var(--bg-alt);
+}
+.search-input:focus {
+    border-color: var(--accent);
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,155,119,0.1);
+}
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 1.2rem;
+}
+.filters-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 140px;
+}
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+}
+.filter-select:hover {
+    border-color: var(--accent);
+}
+.date-input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: #fff;
+    width: 100%;
+}
+.clear-filters-btn {
+    padding: 8px 16px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+.clear-filters-btn:hover {
+    background: #fff;
+    border-color: var(--text);
+}
+.results-count {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 500;
+    padding: 8px 0;
+}
+
+/* Jobs List */
+.job-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 12px; background: #fff; transition: border-color 0.2s;
+    gap: 16px;
+}
+.job-item:hover { border-color: var(--accent); }
+.job-item-content {
+    flex: 1;
+    min-width: 0;
+}
+.job-item-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.job-status {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    margin-left: 8px;
+}
+.status-pending { background: #FFF7ED; color: #C2410C; }
+.status-assigned { background: #ECFDF5; color: #047857; }
+.outsider-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    background: #EDE9FE; color: #6B21A8; margin-left: 8px;
+}
+.assigned-worker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--text-light);
+}
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+.empty-state-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.empty-state-subtext {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Rotation UI */
+.installer-card {
+    background: linear-gradient(135deg, var(--primary) 0%, #1F2937 100%);
+    color: #fff; border-radius: 16px; padding: 40px; text-align: center;
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; min-height: 320px;
+}
+.installer-name { font-size: 3.5rem; font-weight: 800; margin: 10px 0; letter-spacing: -0.02em; }
+.installer-meta { font-family: var(--font-mono); font-size: 0.9rem; opacity: 0.8; margin-bottom: 30px; }
+.replacement-alert {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 20px;
+}
+
+/* Stats Filters */
+.filters-container { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-chip {
+    padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);
+    background: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; user-select: none; transition: 0.2s;
+}
+.filter-chip:hover { background: var(--bg-alt); }
+.filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: linear-gradient(135deg, #fff 0%, #F9FAFB 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Calendar Styles */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+}
+.calendar-header {
+    text-align: center;
+    font-weight: 700;
+    padding: 12px;
+    background: var(--bg-alt);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text);
+}
+.calendar-day {
+    min-height: 100px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    background: #fff;
+    position: relative;
+}
+.calendar-day-number {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+.calendar-event {
+    background: var(--accent);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+    line-height: 1.3;
+}
+.calendar-event:hover {
+    background: var(--accent-hover);
+}
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.calendar-month {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Timeline View */
+.timeline-container {
+    position: relative;
+    padding: 20px 0;
+}
+.timeline-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    position: relative;
+}
+.timeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 4px;
+    position: relative;
+    z-index: 2;
+}
+.timeline-line {
+    position: absolute;
+    left: 7px;
+    top: 20px;
+    bottom: -30px;
+    width: 2px;
+    background: var(--border);
+}
+.timeline-content {
+    flex: 1;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+}
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.timeline-installer {
+    font-weight: 700;
+    color: var(--primary);
+}
+.timeline-response {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+.response-yes {
+    background: #ECFDF5;
+    color: #047857;
+}
+.response-no {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 100; display: none;
+    align-items: center; justify-content: center; backdrop-filter: blur(4px);
+    padding: 20px;
+}
+.modal { 
+    background: #fff; padding: 32px; border-radius: 16px; 
+    width: 700px; max-width: 100%; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+}
+.detail-row { 
+    margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--bg-alt);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.detail-row.full { grid-template-columns: 1fr; }
+.detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.detail-label { 
+    font-size: 0.75rem; color: var(--text-light); 
+    text-transform: uppercase; letter-spacing: 0.05em; 
+}
+.detail-content { 
+    font-size: 1rem; font-weight: 500; color: var(--primary); word-break: break-word; 
+}
+.detail-input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: var(--font-main);
+}
+.detail-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,155,119,0.1);
+}
+.edit-mode-toggle {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.panel { display: none; animation: fadeIn 0.3s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.toast {
+    position: fixed; bottom: 30px; right: 30px; background: var(--primary); color: #fff;
+    padding: 12px 24px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 350px;
+    margin-bottom: 30px;
+}
+
+/* ══════════════════════════════════════════════════════ */
+/* RESPONSIVE DESIGN - MOBILE FIRST */
+/* ══════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    .installer-card {
+        padding: 30px 20px;
+        min-height: 280px;
+    }
+    .installer-name {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    
+    .mobile-header {
+        display: flex;
+    }
+    
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 99;
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        padding: 20px;
+        width: 100%;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card {
+        padding: 16px;
+    }
+    
+    .search-filter-section {
+        padding: 16px;
+    }
+    
+    .filters-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .clear-filters-btn {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .job-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .job-item-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .calendar-grid {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 80px;
+        padding: 4px;
+    }
+    
+    .calendar-day-number {
+        font-size: 0.75rem;
+    }
+    
+    .calendar-event {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+    }
+    
+    .calendar-month {
+        font-size: 1.2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .installer-card {
+        padding: 20px 16px;
+        min-height: 240px;
+    }
+    
+    .installer-name {
+        font-size: 2rem;
+    }
+    
+    .installer-meta {
+        font-size: 0.8rem;
+    }
+    
+    .modal {
+        padding: 24px 16px;
+        max-height: 85vh;
+    }
+    
+    .detail-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 16px;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+        margin-bottom: 16px;
+    }
+    
+    h3 {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .calendar-header {
+        padding: 8px 4px;
+        font-size: 0.7rem;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+    }
+    
+    .toast {
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        text-align: center;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="mobile-header">
+    <div class="brand">Nomadtika<span>Rotation</span></div>
+    <button class="menu-toggle" onclick="toggleMobileMenu()">☰</button>
+</div>
+
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+<div class="app-container">
+    <div class="sidebar" id="sidebar">
+        <div>
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#009B77" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                Nomadtika<span>Rotation</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-item active" onclick="switchTab('jobs')">
+                    <span>📝</span> Job Management
+                </button>
+                <button class="nav-item locked" id="navRotacion" onclick="switchTab('rotation')">
+                    <span>⚡</span> Rotation
+                </button>
+                <button class="nav-item" onclick="switchTab('calendar')">
+                    <span>📅</span> Calendar
+                </button>
+                <button class="nav-item" onclick="switchTab('statistics')">
+                    <span>📊</span> Statistics
+                </button>
+            </div>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-light);">
+            v3.2 - Nomadtika<br>&copy; 2026
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <!-- JOBS PANEL -->
+        <div id="panel-jobs" class="panel active">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                <h2>Job Management</h2>
+            </div>
+            
+            <div class="card">
+                <h3>New Job</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Client *</label>
+                        <input type="text" id="jobClient" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Address *</label>
+                        <input type="text" id="jobAddress" placeholder="Site address">
+                    </div>
+                    <div class="form-group full">
+                        <label>Type *</label>
+                        <select id="jobType">
+                            <option value="Installation">Installation</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Measurement">Measurement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" id="jobDate">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" id="jobEndDate">
+                        <span class="error-message" id="endDateError" style="display:none;">End date cannot be before start date</span>
+                    </div>
+                    <div class="form-group full">
+                        <label>Helper / Assistant</label>
+                        <input type="text" id="jobOutsider" placeholder="Name of the helper (optional)">
+                    </div>
+                    <div class="form-group full">
+                        <label>Attach File (PDF/IMG)</label>
+                        <div class="file-upload-wrapper" id="dropzone">
+                            <input type="file" id="jobFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                            <span id="dropText">Click to attach work order</span>
+                            <div id="fileName" class="file-name"></div>
+                        </div>
+                    </div>
+                    <div class="form-group full">
+                        <label>Notes</label>
+                        <textarea id="jobNotes" rows="2" placeholder="Special instructions, additional details..."></textarea>
+                    </div>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="btnSaveJob">Save Job</button>
+                    <button class="btn btn-outline" id="btnClearJob">Clear</button>
+                </div>
+            </div>
+
+            <!-- Search & Filter Section -->
+            <div class="search-filter-section">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by client, address...">
+                </div>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select id="filterStatus" class="filter-select">
+                            <option value="">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Assigned">Assigned</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Type</label>
+                        <select id="filterType" class="filter-select">
+                            <option value="">All</option>
+                            <option value="Installation">Installation</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Measurement">Measurement</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date From</label>
+                        <input type="date" id="filterDateFrom" class="date-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date To</label>
+                        <input type="date" id="filterDateTo" class="date-input">
+                    </div>
+                    <button class="clear-filters-btn" id="btnClearFilters">✕ Clear Filters</button>
+                </div>
+                <div class="results-count" id="resultsCount">Showing 0 jobs</div>
+            </div>
+
+            <h3>Jobs List</h3>
+            <div id="jobsList"></div>
+        </div>
+
+        <!-- ROTATION PANEL -->
+        <div id="panel-rotation" class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 12px;">
+                <h2>Active Rotation</h2>
+                <div style="background:#E5E7EB; padding:8px 16px; border-radius:20px; font-weight:600;">
+                    Assigning: <span id="activeJobClient" style="color:var(--accent)">...</span>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:24px;">
+                <div>
+                    <div class="installer-card">
+                        <div style="text-transform:uppercase; font-size:0.8rem; letter-spacing:0.1em; opacity:0.7;">Current Turn</div>
+                        <div class="installer-name" id="assignName">Daniel</div>
+                        <div class="installer-meta">
+                            Priority <span id="assignPriority">P1</span> • Global Job #<span id="workBadge">1</span>
+                        </div>
+                        
+                        <div id="replacementBadge" class="replacement-alert" style="display:none">
+                            <span id="replacementText"></span>
+                        </div>
+
+                        <div style="display:flex; gap:16px; width:100%; max-width:400px;">
+                            <button class="btn btn-success" style="flex:1; padding:16px;" id="btnAccept">✓ Accept</button>
+                            <button class="btn btn-danger" style="flex:1; padding:16px;" id="btnReject">✗ Reject</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Token Status</h3>
+                    <div id="installersList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALENDAR PANEL -->
+        <div id="panel-calendar" class="panel">
+            <div class="calendar-controls">
+                <button class="btn btn-outline btn-sm" id="btnPrevMonth">← Previous</button>
+                <div class="calendar-month" id="calendarMonth">January 2026</div>
+                <button class="btn btn-outline btn-sm" id="btnNextMonth">Next →</button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="calendar-header">Sun</div>
+                <div class="calendar-header">Mon</div>
+                <div class="calendar-header">Tue</div>
+                <div class="calendar-header">Wed</div>
+                <div class="calendar-header">Thu</div>
+                <div class="calendar-header">Fri</div>
+                <div class="calendar-header">Sat</div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <h3>Upcoming Jobs</h3>
+                <div id="upcomingJobs"></div>
+            </div>
+        </div>
+
+        <!-- STATISTICS PANEL -->
+        <div id="panel-statistics" class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 12px;">
+                <h2>Statistics</h2>
+                <button class="btn btn-outline btn-sm" id="btnExportExcel">⬇ Export Excel</button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotalJobs">0</div>
+                    <div class="stat-label">Total Jobs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statPending">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statAssigned">0</div>
+                    <div class="stat-label">Assigned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statAcceptRate">0%</div>
+                    <div class="stat-label">Acceptance Rate</div>
+                </div>
+            </div>
+
+            <!-- Chart 1: Performance by Installer -->
+            <div class="card">
+                <h3>Performance Comparison by Installer</h3>
+                <div class="filters-container" id="chartFilters"></div>
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+                <div style="text-align:center; font-size:0.8rem; color:var(--text-light); margin-top:10px;">
+                    <span style="color:#10B981">●</span> Personal YES &nbsp;
+                    <span style="color:#009B77">●</span> Replacement YES &nbsp;
+                    <span style="color:#EF4444">●</span> Personal NO &nbsp;
+                    <span style="color:#991B1B">●</span> Replacement NO
+                </div>
+            </div>
+
+            <!-- Chart 2: Jobs by Type -->
+            <div class="card">
+                <h3>Distribution by Job Type</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="jobTypeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 3: Acceptance Rate Over Time -->
+            <div class="card">
+                <h3>Acceptance Rate by Installer</h3>
+                <div class="chart-container">
+                    <canvas id="acceptanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Job Details Modal -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal">
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items: center;">
+            <h3>Job Details</h3>
+            <button onclick="closeModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding: 4px 8px;">&times;</button>
+        </div>
+        <div class="edit-mode-toggle">
+            <button class="btn btn-outline btn-sm" id="btnEditMode">✏️ Edit</button>
+            <button class="btn btn-success btn-sm" id="btnSaveEdit" style="display:none;">💾 Save Changes</button>
+            <button class="btn btn-outline btn-sm" id="btnCancelEdit" style="display:none;">✕ Cancel</button>
+        </div>
+        <div id="modalContent"></div>
+        <div style="margin-top:24px; text-align:right;">
+            <button class="btn btn-primary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Notification</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA & STATE
+// ═══════════════════════════════════════════════════
+const INSTALLERS = [
+  {id:1,name:'Daniel',priority:'P1'},
+  {id:2,name:'Jimmy',priority:'P2'},
+  {id:3,name:'Cristian',priority:'P3'},
+  {id:4,name:'Bob',priority:'P4'},
+  {id:5,name:'Kafw',priority:'P5'},
+  {id:6,name:'Kyle',priority:'P6'}
+];
+
+let rCounter = 0;
+let state = {
+    currentWork: 1,
+    tracking: INSTALLERS.map(i=>({...i, replacements:[], usedReplacements:[]})),
+    history: [],
+    offer: {installerId:1, isReplacement:false, logic:null, originalInstaller:null, alreadyAsked:[], replacementNumber:null},
+    jobs: [],
+    activeJobId: null
+};
+
+let visibleInstallers = new Set(INSTALLERS.map(i=>i.id));
+
+let filterState = {
+    searchQuery: '',
+    status: '',
+    type: '',
+    dateFrom: '',
+    dateTo: ''
+};
+
+let currentCalendarDate = new Date();
+let editMode = false;
+let currentEditingJobId = null;
+
+// ═══════════════════════════════════════════════════
+// MOBILE MENU
+// ═══════════════════════════════════════════════════
+function toggleMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    sidebar.classList.toggle('mobile-open');
+    overlay.classList.toggle('active');
+}
+
+// Close menu when clicking nav items on mobile
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        if(window.innerWidth <= 768) {
+            toggleMobileMenu();
+        }
+    });
+});
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function switchTab(tabId) {
+    if(tabId === 'rotation' && state.activeJobId === null) {
+        showToast("⚠️ Please select a job first");
+        return;
+    }
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-'+tabId).classList.add('active');
+    
+    const navItems = document.querySelectorAll('.nav-item');
+    if(tabId==='jobs') navItems[0].classList.add('active');
+    if(tabId==='rotation') navItems[1].classList.add('active');
+    if(tabId==='calendar') {
+        navItems[2].classList.add('active');
+        renderCalendar();
+        renderUpcomingJobs();
+    }
+    if(tabId==='statistics') {
+        navItems[3].classList.add('active');
+        updateStats();
+        renderFilters();
+        updateCharts();
+    }
+}
+
+function updateRotacionLockUI() {
+    const btn = document.getElementById('navRotacion');
+    if(state.activeJobId !== null) {
+        btn.classList.remove('locked');
+        btn.innerHTML = '<span>⚡</span> Assigning...';
+    } else {
+        btn.classList.add('locked');
+        btn.innerHTML = '<span>⚡</span> Rotation';
+    }
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═══════════════════════════════════════════════════
+// FORM VALIDATION
+// ═══════════════════════════════════════════════════
+function validateJobForm() {
+    const client = document.getElementById('jobClient').value.trim();
+    const address = document.getElementById('jobAddress').value.trim();
+    const type = document.getElementById('jobType').value;
+    const date = document.getElementById('jobDate').value;
+    
+    return client && address && type && date;
+}
+
+function validateDateRange(startDate, endDate) {
+    if(!startDate || !endDate) return true;
+    return endDate >= startDate;
+}
+
+function showDateError() {
+    const errorEl = document.getElementById('endDateError');
+    const endDateInput = document.getElementById('jobEndDate');
+    errorEl.style.display = 'block';
+    endDateInput.classList.add('error');
+}
+
+function hideDateError() {
+    const errorEl = document.getElementById('endDateError');
+    const endDateInput = document.getElementById('jobEndDate');
+    errorEl.style.display = 'none';
+    endDateInput.classList.remove('error');
+}
+
+document.getElementById('jobDate').addEventListener('change', () => {
+    const startDate = document.getElementById('jobDate').value;
+    const endDate = document.getElementById('jobEndDate').value;
+    if(validateDateRange(startDate, endDate)) {
+        hideDateError();
+    } else {
+        showDateError();
+    }
+});
+
+document.getElementById('jobEndDate').addEventListener('change', () => {
+    const startDate = document.getElementById('jobDate').value;
+    const endDate = document.getElementById('jobEndDate').value;
+    if(validateDateRange(startDate, endDate)) {
+        hideDateError();
+    } else {
+        showDateError();
+    }
+});
+
+// ═══════════════════════════════════════════════════
+// ROTATION LOGIC
+// ═══════════════════════════════════════════════════
+function getById(id){ return state.tracking.find(i=>i.id===id) }
+function getCurrentInstaller(){ return ((state.currentWork-1)%6)+1 }
+
+function findLogicA(asked=[]){
+  const avail = state.tracking.filter(i=>i.replacements.length>0 && !asked.includes(i.id));
+  if(!avail.length) return null;
+  avail.sort((a,b)=>Math.min(...a.replacements)-Math.min(...b.replacements));
+  return avail[0];
+}
+function findLogicB(origId, asked=[]){
+  const idx = INSTALLERS.findIndex(i=>i.id===origId);
+  for(let i=1;i<INSTALLERS.length;i++){
+    const id = INSTALLERS[(idx+i)%INSTALLERS.length].id;
+    if(!asked.includes(id)) return getById(id);
+  }
+  return null;
+}
+function offerReplacement(origId, asked=[]){
+  let rep = findLogicA(asked);
+  if(rep){
+    state.offer={installerId:rep.id, isReplacement:true, logic:'A', originalInstaller:origId, alreadyAsked:asked, replacementNumber:rep.replacements[0]};
+    renderRotation(); return;
+  }
+  rep = findLogicB(origId, asked);
+  if(rep){
+    state.offer={installerId:rep.id, isReplacement:true, logic:'B', originalInstaller:origId, alreadyAsked:asked, replacementNumber:null};
+    renderRotation();
+  }
+}
+
+function handleAccept(){
+  const ins = getById(state.offer.installerId);
+  let note = '';
+  
+  if(state.offer.isReplacement){
+    if(state.offer.logic==='A'){
+      const used = ins.replacements.shift();
+      ins.usedReplacements.push(used);
+      note = `Replacement A (R${state.offer.replacementNumber})`;
+    } else { note = `Replacement B`; }
+    state.history.push({
+      work:state.currentWork, installerId:ins.id, installerName:ins.name,
+      response:'YES', type:'REPLACEMENT', notes: note, jobId: state.activeJobId
+    });
+  } else {
+    rCounter++;
+    ins.replacements.push(rCounter);
+    note = `Normal (R${rCounter})`;
+    state.history.push({
+      work:state.currentWork, installerId:ins.id, installerName:ins.name,
+      response:'YES', type:'NORMAL', notes: note, jobId: state.activeJobId
+    });
+  }
+
+  const jobIndex = state.jobs.findIndex(j=>j.id===state.activeJobId);
+  if(jobIndex > -1) {
+      state.jobs[jobIndex].status = 'Assigned';
+      state.jobs[jobIndex].assignedTo = ins.name;
+      state.jobs[jobIndex].assignedDate = new Date().toLocaleDateString();
+  }
+
+  state.currentWork++;
+  state.offer={installerId:getCurrentInstaller(), isReplacement:false, logic:null, originalInstaller:null, alreadyAsked:[], replacementNumber:null};
+  state.activeJobId = null;
+  updateRotacionLockUI(); renderJobs(); switchTab('jobs');
+  showToast(`✅ Job assigned to ${ins.name}`);
+}
+
+function handleReject(){
+  const ins = getById(state.offer.installerId);
+  const origRejector = state.offer.originalInstaller || ins.id;
+  const asked = [...state.offer.alreadyAsked, ins.id];
+  
+  state.history.push({
+      work:state.currentWork, installerId:ins.id, installerName:ins.name,
+      response:'NO', type: state.offer.isReplacement ? 'REPLACEMENT' : 'NORMAL',
+      notes: 'Rejected', jobId: state.activeJobId
+  });
+
+  if(state.offer.isReplacement && state.offer.logic==='A'){
+      const used = ins.replacements.shift();
+      ins.usedReplacements.push(used);
+  }
+  offerReplacement(origRejector, asked);
+}
+
+document.getElementById('btnAccept').addEventListener('click', handleAccept);
+document.getElementById('btnReject').addEventListener('click', handleReject);
+
+function renderRotation() {
+    const ins = getById(state.offer.installerId);
+    const job = state.jobs.find(j => j.id === state.activeJobId);
+    document.getElementById('activeJobClient').textContent = job ? job.client : '...';
+    document.getElementById('assignName').textContent = ins.name;
+    document.getElementById('assignPriority').textContent = ins.priority;
+    document.getElementById('workBadge').textContent = state.currentWork;
+
+    const rb = document.getElementById('replacementBadge');
+    if(state.offer.isReplacement) {
+        rb.style.display = 'block';
+        const orig = getById(state.offer.originalInstaller);
+        document.getElementById('replacementText').textContent = 
+            state.offer.logic === 'A' 
+            ? `⚠ Replaces ${orig.name} (Uses Token R${state.offer.replacementNumber})`
+            : `ℹ Next available after ${orig.name} (Logic B)`;
+    } else { rb.style.display = 'none'; }
+
+    document.getElementById('installersList').innerHTML = state.tracking.map(i => {
+        const has = i.replacements.length > 0;
+        return `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
+            <div style="font-weight:600; ${i.id===ins.id ? 'color:var(--accent)':''}">${i.name}</div>
+            <div style="font-family:monospace; font-size:0.8rem; background:${has?'#ECFDF5':'#F3F4F6'}; color:${has?'#047857':'#9CA3AF'}; padding:2px 8px; border-radius:4px;">
+                ${has ? i.replacements.join(', ') : '0'}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// JOB MANAGEMENT
+// ═══════════════════════════════════════════════════
+const fileInput = document.getElementById('jobFile');
+const dropzone = document.getElementById('dropzone');
+let pendingFile = null;
+
+dropzone.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', (e)=>{
+    if(e.target.files[0]) {
+        pendingFile = e.target.files[0];
+        document.getElementById('fileName').textContent = "📄 " + pendingFile.name;
+    }
+});
+
+document.getElementById('btnSaveJob').addEventListener('click', ()=>{
+    if(!validateJobForm()) {
+        showToast("⚠️ Please complete required fields: Client, Address, Type, and Start Date");
+        return;
+    }
+
+    const startDate = document.getElementById('jobDate').value;
+    const endDate = document.getElementById('jobEndDate').value;
+    
+    if(!validateDateRange(startDate, endDate)) {
+        showToast("⚠️ End date cannot be before start date");
+        showDateError();
+        return;
+    }
+
+    const client = document.getElementById('jobClient').value.trim();
+    const addr = document.getElementById('jobAddress').value.trim();
+    const outsider = document.getElementById('jobOutsider').value.trim();
+
+    let fileUrl = null;
+    let fileName = null;
+    if(pendingFile) {
+        fileUrl = URL.createObjectURL(pendingFile);
+        fileName = pendingFile.name;
+    }
+
+    const newJob = {
+        id: Date.now(), 
+        client: client, 
+        address: addr,
+        type: document.getElementById('jobType').value,
+        date: startDate,
+        endDate: endDate || null,
+        outsider: outsider || null,
+        notes: document.getElementById('jobNotes').value,
+        fileName: fileName,
+        fileUrl: fileUrl,
+        status: 'Pending', 
+        assignedTo: null,
+        rotationHistory: []
+    };
+
+    state.jobs.push(newJob);
+    renderJobs();
+    document.getElementById('btnClearJob').click();
+    showToast("✅ Job Saved");
+});
+
+document.getElementById('btnClearJob').addEventListener('click', ()=>{
+    document.getElementById('jobClient').value = '';
+    document.getElementById('jobAddress').value = '';
+    document.getElementById('jobNotes').value = '';
+    document.getElementById('jobEndDate').value = '';
+    document.getElementById('jobOutsider').value = '';
+    document.getElementById('fileName').textContent = '';
+    hideDateError();
+    pendingFile = null;
+});
+
+// ═══════════════════════════════════════════════════
+// SEARCH & FILTER
+// ═══════════════════════════════════════════════════
+function getFilteredJobs() {
+    let filtered = [...state.jobs];
+    
+    if (filterState.searchQuery) {
+        const query = filterState.searchQuery.toLowerCase();
+        filtered = filtered.filter(job => 
+            job.client.toLowerCase().includes(query) ||
+            job.address.toLowerCase().includes(query) ||
+            (job.assignedTo && job.assignedTo.toLowerCase().includes(query))
+        );
+    }
+    
+    if (filterState.status) {
+        filtered = filtered.filter(job => job.status === filterState.status);
+    }
+    
+    if (filterState.type) {
+        filtered = filtered.filter(job => job.type === filterState.type);
+    }
+    
+    if (filterState.dateFrom) {
+        filtered = filtered.filter(job => job.date && job.date >= filterState.dateFrom);
+    }
+    
+    if (filterState.dateTo) {
+        filtered = filtered.filter(job => job.date && job.date <= filterState.dateTo);
+    }
+    
+    return filtered;
+}
+
+function updateResultsCount(count) {
+    document.getElementById('resultsCount').textContent = `Showing ${count} job${count !== 1 ? 's' : ''}`;
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    filterState.searchQuery = e.target.value;
+    renderJobs();
+});
+
+document.getElementById('filterStatus').addEventListener('change', (e) => {
+    filterState.status = e.target.value;
+    renderJobs();
+});
+
+document.getElementById('filterType').addEventListener('change', (e) => {
+    filterState.type = e.target.value;
+    renderJobs();
+});
+
+document.getElementById('filterDateFrom').addEventListener('change', (e) => {
+    filterState.dateFrom = e.target.value;
+    renderJobs();
+});
+
+document.getElementById('filterDateTo').addEventListener('change', (e) => {
+    filterState.dateTo = e.target.value;
+    renderJobs();
+});
+
+document.getElementById('btnClearFilters').addEventListener('click', () => {
+    filterState = {
+        searchQuery: '',
+        status: '',
+        type: '',
+        dateFrom: '',
+        dateTo: ''
+    };
+    
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
+    
+    renderJobs();
+    showToast('🔄 Filters cleared');
+});
+
+function renderJobs() {
+    const list = document.getElementById('jobsList');
+    const filteredJobs = getFilteredJobs();
+    
+    updateResultsCount(filteredJobs.length);
+    
+    if(!filteredJobs.length) {
+        if(state.jobs.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-text">No jobs registered</div>
+                    <div class="empty-state-subtext">Start by creating a new job above</div>
+                </div>
+            `;
+        } else {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div class="empty-state-text">No results found</div>
+                    <div class="empty-state-subtext">Try adjusting your search filters</div>
+                </div>
+            `;
+        }
+        return;
+    }
+    
+    list.innerHTML = filteredJobs.slice().reverse().map(job => `
+        <div class="job-item">
+            <div class="job-item-content">
+                <div style="font-weight:700; color:var(--primary)">${job.client}</div>
+                <div style="font-size:0.85rem; color:var(--text-light)">
+                    ${job.address} • ${job.date||'-'}${job.endDate ? ' → ' + job.endDate : ''}
+                </div>
+                <div style="margin-top: 4px;">
+                    <span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span>
+                    ${job.outsider ? '<span class="outsider-badge">HELPER: ' + job.outsider + '</span>' : ''}
+                </div>
+                ${job.assignedTo ? `
+                <div class="assigned-worker">
+                    👤 Assigned to: ${job.assignedTo}${job.outsider ? ' + ' + job.outsider : ''}
+                </div>
+                ` : ''}
+            </div>
+            <div class="job-item-actions">
+                 ${job.status === 'Pending' 
+                    ? `<button class="btn btn-primary btn-sm" onclick="startRotation(${job.id})">→ Assign</button>` 
+                    : `<button class="btn btn-outline btn-sm" onclick="viewDetails(${job.id})">📋 Details</button>`
+                }
+            </div>
+        </div>
+    `).join('');
+}
+
+window.startRotation = function(id) {
+    state.activeJobId = id;
+    updateRotacionLockUI();
+    switchTab('rotation');
+    renderRotation();
+}
+
+window.viewDetails = function(id) {
+    currentEditingJobId = id;
+    editMode = false;
+    renderJobDetails(id);
+    document.getElementById('detailModal').style.display = 'flex';
+}
+
+function renderJobDetails(id) {
+    const job = state.jobs.find(j => j.id === id);
+    if(!job) return;
+    
+    const jobHistory = state.history.filter(h => h.jobId === id);
+    
+    // Toggle buttons visibility
+    document.getElementById('btnEditMode').style.display = editMode ? 'none' : 'inline-flex';
+    document.getElementById('btnSaveEdit').style.display = editMode ? 'inline-flex' : 'none';
+    document.getElementById('btnCancelEdit').style.display = editMode ? 'inline-flex' : 'none';
+    
+    let downloadHtml = '';
+    if(job.fileUrl && job.fileName) {
+        downloadHtml = `
+        <div class="detail-row full" style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0;">
+            <div class="detail-label" style="margin-bottom:8px;">Attached File</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+                <span style="font-weight:600; font-size:0.9rem;">${job.fileName}</span>
+                <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
+            </div>
+        </div>`;
+    } else {
+        downloadHtml = `<div class="detail-row full"><div class="detail-label">File</div><div class="detail-content" style="color:#999;">No attachment</div></div>`;
+    }
+
+    let historyHtml = '';
+    if(jobHistory.length > 0) {
+        historyHtml = `
+        <div class="detail-row full">
+            <div class="detail-label">Rotation History</div>
+            <div class="timeline-container">
+                ${jobHistory.map(h => `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div style="position:relative; width:100%;">
+                            ${jobHistory.indexOf(h) < jobHistory.length - 1 ? '<div class="timeline-line"></div>' : ''}
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <div class="timeline-installer">${h.installerName}</div>
+                                    <span class="timeline-response ${h.response === 'YES' ? 'response-yes' : 'response-no'}">
+                                        ${h.response === 'YES' ? '✓ ACCEPTED' : '✗ REJECTED'}
+                                    </span>
+                                </div>
+                                <div style="font-size:0.85rem; color:var(--text-light);">${h.notes}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+
+    const html = `
+        <div class="detail-row">
+            <div class="detail-field">
+                <div class="detail-label">Client</div>
+                ${editMode 
+                    ? `<input type="text" class="detail-input" id="edit-client" value="${job.client}">` 
+                    : `<div class="detail-content">${job.client}</div>`
+                }
+            </div>
+            <div class="detail-field">
+                <div class="detail-label">Address</div>
+                ${editMode 
+                    ? `<input type="text" class="detail-input" id="edit-address" value="${job.address}">` 
+                    : `<div class="detail-content">${job.address}</div>`
+                }
+            </div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-field">
+                <div class="detail-label">Type</div>
+                ${editMode 
+                    ? `<select class="detail-input" id="edit-type">
+                        <option value="Installation" ${job.type==='Installation'?'selected':''}>Installation</option>
+                        <option value="Maintenance" ${job.type==='Maintenance'?'selected':''}>Maintenance</option>
+                        <option value="Measurement" ${job.type==='Measurement'?'selected':''}>Measurement</option>
+                       </select>` 
+                    : `<div class="detail-content">${job.type}</div>`
+                }
+            </div>
+            <div class="detail-field">
+                <div class="detail-label">Start Date</div>
+                ${editMode 
+                    ? `<input type="date" class="detail-input" id="edit-date" value="${job.date}">` 
+                    : `<div class="detail-content">${job.date || '-'}</div>`
+                }
+            </div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-field">
+                <div class="detail-label">End Date</div>
+                ${editMode 
+                    ? `<input type="date" class="detail-input" id="edit-enddate" value="${job.endDate||''}">` 
+                    : `<div class="detail-content">${job.endDate || '-'}</div>`
+                }
+            </div>
+            <div class="detail-field">
+                <div class="detail-label">Helper / Assistant</div>
+                ${editMode 
+                    ? `<input type="text" class="detail-input" id="edit-outsider" value="${job.outsider||''}" placeholder="Helper name">` 
+                    : `<div class="detail-content">${job.outsider ? '👤 ' + job.outsider : '-'}</div>`
+                }
+            </div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-field">
+                <div class="detail-label">Assigned To</div>
+                <div class="detail-content" style="color:var(--accent); font-weight:700;">${job.assignedTo || '-'}</div>
+            </div>
+            <div class="detail-field">
+                <div class="detail-label">Status</div>
+                <div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div>
+            </div>
+        </div>
+        ${downloadHtml}
+        <div class="detail-row full">
+            <div class="detail-label">Notes</div>
+            ${editMode 
+                ? `<textarea class="detail-input" id="edit-notes" rows="3" style="resize: vertical;">${job.notes||''}</textarea>` 
+                : `<div class="detail-content" style="font-size:0.9rem;">${job.notes || '-'}</div>`
+            }
+        </div>
+        ${historyHtml}
+    `;
+    document.getElementById('modalContent').innerHTML = html;
+}
+
+document.getElementById('btnEditMode').addEventListener('click', () => {
+    editMode = true;
+    renderJobDetails(currentEditingJobId);
+});
+
+document.getElementById('btnCancelEdit').addEventListener('click', () => {
+    editMode = false;
+    renderJobDetails(currentEditingJobId);
+});
+
+document.getElementById('btnSaveEdit').addEventListener('click', () => {
+    const job = state.jobs.find(j => j.id === currentEditingJobId);
+    if(!job) return;
+    
+    const newStartDate = document.getElementById('edit-date').value;
+    const newEndDate = document.getElementById('edit-enddate').value;
+    
+    if(!validateDateRange(newStartDate, newEndDate)) {
+        showToast("⚠️ End date cannot be before start date");
+        return;
+    }
+    
+    job.client = document.getElementById('edit-client').value.trim();
+    job.address = document.getElementById('edit-address').value.trim();
+    job.type = document.getElementById('edit-type').value;
+    job.date = newStartDate;
+    job.endDate = newEndDate || null;
+    job.outsider = document.getElementById('edit-outsider').value.trim() || null;
+    job.notes = document.getElementById('edit-notes').value;
+    
+    editMode = false;
+    renderJobDetails(currentEditingJobId);
+    renderJobs();
+    showToast("✅ Changes saved");
+});
+
+window.closeModal = function() { 
+    document.getElementById('detailModal').style.display = 'none';
+    editMode = false;
+    currentEditingJobId = null;
+}
+
+// ═══════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════
+function renderCalendar() {
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const grid = document.getElementById('calendarGrid');
+    const headers = grid.querySelectorAll('.calendar-header');
+    grid.innerHTML = '';
+    headers.forEach(h => grid.appendChild(h));
+    
+    for(let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-day';
+        empty.style.opacity = '0.3';
+        grid.appendChild(empty);
+    }
+    
+    for(let day = 1; day <= daysInMonth; day++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+        
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        
+        const jobsOnDay = state.jobs.filter(j => {
+            if(!j.date) return false;
+            if(j.endDate) {
+                return dateStr >= j.date && dateStr <= j.endDate;
+            }
+            return j.date === dateStr;
+        });
+        
+        dayEl.innerHTML = `
+            <div class="calendar-day-number">${day}</div>
+            ${jobsOnDay.map(j => {
+                const displayText = j.assignedTo 
+                    ? `${j.assignedTo}${j.outsider ? ' / ' + j.outsider : ''}: ${j.client.substring(0, 12)}`
+                    : j.client.substring(0, 15);
+                return `
+                <div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client}">
+                    ${displayText}${displayText.length < (j.assignedTo ? j.assignedTo.length + j.client.length : j.client.length) ? '...' : ''}
+                </div>`;
+            }).join('')}
+        `;
+        
+        grid.appendChild(dayEl);
+    }
+}
+
+function renderUpcomingJobs() {
+    const today = new Date().toISOString().split('T')[0];
+    const upcoming = state.jobs
+        .filter(j => j.date >= today && j.status === 'Assigned')
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(0, 10);
+    
+    const container = document.getElementById('upcomingJobs');
+    if(upcoming.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-light);">No upcoming assigned jobs</div>';
+        return;
+    }
+    
+    container.innerHTML = upcoming.map(j => `
+        <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <div style="font-weight:700; color:var(--primary)">${j.client}</div>
+                <div style="font-size:0.85rem; color:var(--text-light)">
+                    👤 ${j.assignedTo}${j.outsider ? ' + ' + j.outsider : ''} • ${j.date}${j.endDate ? ' → ' + j.endDate : ''}
+                </div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="viewDetails(${j.id})">View</button>
+        </div>
+    `).join('');
+}
+
+document.getElementById('btnPrevMonth').addEventListener('click', () => {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+    renderCalendar();
+});
+
+document.getElementById('btnNextMonth').addEventListener('click', () => {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// ═══════════════════════════════════════════════════
+// STATISTICS
+// ═══════════════════════════════════════════════════
+function updateStats() {
+    const total = state.jobs.length;
+    const pending = state.jobs.filter(j => j.status === 'Pending').length;
+    const assigned = state.jobs.filter(j => j.status === 'Assigned').length;
+    
+    const totalResponses = state.history.length;
+    const acceptedResponses = state.history.filter(h => h.response === 'YES').length;
+    const acceptRate = totalResponses > 0 ? Math.round((acceptedResponses / totalResponses) * 100) : 0;
+    
+    document.getElementById('statTotalJobs').textContent = total;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statAssigned').textContent = assigned;
+    document.getElementById('statAcceptRate').textContent = acceptRate + '%';
+}
+
+let chartInstance = null;
+let jobTypeChartInstance = null;
+let acceptanceChartInstance = null;
+
+function renderFilters() {
+    const container = document.getElementById('chartFilters');
+    container.innerHTML = INSTALLERS.map(ins => {
+        const isActive = visibleInstallers.has(ins.id);
+        return `
+        <div class="filter-chip ${isActive?'active':''}" onclick="toggleFilter(${ins.id})">
+            <span class="chip-dot" style="background:${isActive?'#fff':'#999'}"></span>
+            ${ins.name}
+        </div>`;
+    }).join('');
+}
+
+window.toggleFilter = function(id) {
+    if(visibleInstallers.has(id)) {
+        if(visibleInstallers.size > 1) visibleInstallers.delete(id);
+    } else {
+        visibleInstallers.add(id);
+    }
+    renderFilters();
+    updateCharts();
+}
+
+function updateCharts() {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    if(chartInstance) chartInstance.destroy();
+
+    const filteredInstallers = INSTALLERS.filter(i => visibleInstallers.has(i.id));
+    const labels = filteredInstallers.map(i => i.name);
+
+    const dataPersonalSI = [];
+    const dataReemplazoSI = [];
+    const dataPersonalNO = [];
+    const dataReemplazoNO = [];
+
+    filteredInstallers.forEach(ins => {
+        const events = state.history.filter(h => h.installerId === ins.id);
+        dataPersonalSI.push(events.filter(h => h.response==='YES' && h.type==='NORMAL').length);
+        dataReemplazoSI.push(events.filter(h => h.response==='YES' && h.type==='REPLACEMENT').length);
+        dataPersonalNO.push(events.filter(h => h.response==='NO' && h.type==='NORMAL').length);
+        dataReemplazoNO.push(events.filter(h => h.response==='NO' && h.type==='REPLACEMENT').length);
+    });
+
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Personal YES', data: dataPersonalSI, backgroundColor: '#10B981' },
+                { label: 'Replacement YES', data: dataReemplazoSI, backgroundColor: '#009B77' },
+                { label: 'Personal NO', data: dataPersonalNO, backgroundColor: '#EF4444' },
+                { label: 'Replacement NO', data: dataReemplazoNO, backgroundColor: '#991B1B' }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true, grid: { color: '#f3f4f6' } },
+                y: { stacked: true, grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    const ctx2 = document.getElementById('jobTypeChart').getContext('2d');
+    if(jobTypeChartInstance) jobTypeChartInstance.destroy();
+
+    const typeCounts = {};
+    state.jobs.forEach(j => {
+        typeCounts[j.type] = (typeCounts[j.type] || 0) + 1;
+    });
+
+    jobTypeChartInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(typeCounts),
+            datasets: [{
+                data: Object.values(typeCounts),
+                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    const ctx3 = document.getElementById('acceptanceChart').getContext('2d');
+    if(acceptanceChartInstance) acceptanceChartInstance.destroy();
+
+    const acceptanceData = INSTALLERS.map(ins => {
+        const events = state.history.filter(h => h.installerId === ins.id);
+        const total = events.length;
+        const accepted = events.filter(h => h.response === 'YES').length;
+        return total > 0 ? Math.round((accepted / total) * 100) : 0;
+    });
+
+    acceptanceChartInstance = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: INSTALLERS.map(i => i.name),
+            datasets: [{
+                label: 'Acceptance Rate (%)',
+                data: acceptanceData,
+                backgroundColor: '#009B77'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════
+document.getElementById('btnExportExcel').addEventListener('click', () => {
+    if(typeof XLSX === 'undefined') { showToast("Error: Excel library not loaded"); return; }
+    
+    const wb = XLSX.utils.book_new();
+
+    const jobsData = state.jobs.map(j => ({
+        ID: j.id,
+        Client: j.client,
+        Address: j.address,
+        Type: j.type,
+        StartDate: j.date,
+        EndDate: j.endDate || '',
+        Helper: j.outsider || '',
+        Status: j.status,
+        AssignedTo: j.assignedTo || '',
+        Notes: j.notes
+    }));
+    const ws1 = XLSX.utils.json_to_sheet(jobsData);
+    XLSX.utils.book_append_sheet(wb, ws1, "Jobs");
+
+    const histData = state.history.map(h => ({
+        GlobalJob: h.work,
+        Installer: h.installerName,
+        Response: h.response,
+        Type: h.type,
+        Notes: h.notes,
+        JobID: h.jobId
+    }));
+    const ws2 = XLSX.utils.json_to_sheet(histData);
+    XLSX.utils.book_append_sheet(wb, ws2, "History");
+
+    XLSX.writeFile(wb, "Nomadtika_Report.xlsx");
+    showToast("📊 Excel downloaded");
+});
+
+// Init
+renderJobs();
+</script>
+</body>
+</html>
