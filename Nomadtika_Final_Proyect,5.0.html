@@ -133,6 +133,108 @@ input.error, select.error { border-color: var(--danger); }
     margin-top: 4px;
 }
 
+/* Material Search Dropdown */
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    background: #fff;
+    font-family: var(--font-main);
+}
+
+.search-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,155,119,0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-light);
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-list.active {
+    display: block;
+}
+
+.dropdown-category {
+    padding: 8px 12px;
+    background: var(--bg-alt);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+}
+
+.dropdown-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--bg-alt);
+    font-size: 0.85rem;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-alt);
+    padding-left: 18px;
+    color: var(--accent);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.selected-material {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #ECFDF5;
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    display: none;
+}
+
+.selected-material.active {
+    display: block;
+}
+
+.selected-material .label {
+    color: var(--text-light);
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.selected-material .value {
+    color: var(--accent);
+    font-weight: 600;
+}
+
 /* File Upload */
 .file-upload-wrapper {
     border: 2px dashed var(--border); border-radius: 8px; padding: 24px;
@@ -166,7 +268,7 @@ input.error, select.error { border-color: var(--danger); }
     position: relative;
     margin-bottom: 16px;
 }
-.search-input {
+.search-bar-input {
     width: 100%;
     padding: 12px 16px 12px 44px;
     border: 2px solid var(--border);
@@ -175,7 +277,7 @@ input.error, select.error { border-color: var(--danger); }
     transition: all 0.2s;
     background: var(--bg-alt);
 }
-.search-input:focus {
+.search-bar-input:focus {
     border-color: var(--accent);
     background: #fff;
     outline: none;
@@ -281,6 +383,11 @@ input.error, select.error { border-color: var(--danger); }
     display: inline-block; padding: 4px 10px; border-radius: 20px;
     font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
     background: #EDE9FE; color: #6B21A8; margin-left: 8px;
+}
+.material-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    background: #DBEAFE; color: #1E40AF; margin-left: 8px;
 }
 .assigned-worker {
     display: inline-flex;
@@ -793,12 +900,21 @@ input.error, select.error { border-color: var(--danger); }
                         <input type="text" id="jobAddress" placeholder="Site address">
                     </div>
                     <div class="form-group full">
-                        <label>Type *</label>
-                        <select id="jobType">
-                            <option value="Installation">Installation</option>
-                            <option value="Maintenance">Maintenance</option>
-                            <option value="Measurement">Measurement</option>
-                        </select>
+                        <label>Material Type *</label>
+                        <div class="search-container">
+                            <input 
+                                type="text" 
+                                id="materialSearch" 
+                                class="search-input" 
+                                placeholder="Search material... (e.g., Frontier, Groove, Cascade)"
+                                autocomplete="off"
+                            >
+                            <div id="dropdownList" class="dropdown-list"></div>
+                        </div>
+                        <div id="selectedMaterial" class="selected-material">
+                            <div class="label">Selected material:</div>
+                            <div class="value" id="selectedMaterialValue"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Start Date *</label>
@@ -836,7 +952,7 @@ input.error, select.error { border-color: var(--danger); }
             <div class="search-filter-section">
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search by client, address...">
+                    <input type="text" id="searchInput" class="search-bar-input" placeholder="Search by client, address...">
                 </div>
                 <div class="filters-row">
                     <div class="filter-group">
@@ -848,12 +964,12 @@ input.error, select.error { border-color: var(--danger); }
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Type</label>
-                        <select id="filterType" class="filter-select">
+                        <label class="filter-label">Material Category</label>
+                        <select id="filterMaterialCategory" class="filter-select">
                             <option value="">All</option>
-                            <option value="Installation">Installation</option>
-                            <option value="Maintenance">Maintenance</option>
-                            <option value="Measurement">Measurement</option>
+                            <option value="Wall Acoustic">Wall Acoustic</option>
+                            <option value="Ceiling Acoustic">Ceiling Acoustic</option>
+                            <option value="Screen Acoustic">Screen Acoustic</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -974,9 +1090,9 @@ input.error, select.error { border-color: var(--danger); }
                 </div>
             </div>
 
-            <!-- Chart 2: Jobs by Type -->
+            <!-- Chart 2: Jobs by Material Category -->
             <div class="card">
-                <h3>Distribution by Job Type</h3>
+                <h3>Distribution by Material Category</h3>
                 <div class="chart-container" style="height: 300px;">
                     <canvas id="jobTypeChart"></canvas>
                 </div>
@@ -1017,6 +1133,48 @@ input.error, select.error { border-color: var(--danger); }
 
 <script>
 // ═══════════════════════════════════════════════════
+// MATERIALS DATA
+// ═══════════════════════════════════════════════════
+const MATERIALS = {
+    'Wall Acoustic': [
+        'Frontier™',
+        'Composition®',
+        'Groove Duet®',
+        'Groove™ Panel',
+        'Mirage™ Textured Panel',
+        'Embrace™ Wall System',
+        'ReForm™',
+        'Lanes™',
+        'Cube™',
+        'Acoustic Timber™',
+        'Quietspace® Panel',
+        'Vertiface®',
+        'Composition® Peel \'n\' Stick Tiles',
+        '3D Tiles',
+        'Horizon™'
+    ],
+    'Ceiling Acoustic': [
+        'Frontier™',
+        'Groove Duet®',
+        'Groove™ Panel',
+        'Grid Ceiling Tiles',
+        'ReForm™',
+        'Horizon™',
+        'Accent Ceiling Tiles',
+        'Quietspace® Panel',
+        'Acoustic Timber™',
+        '3D Ceiling Tiles',
+        'Lattice™',
+        'Cube™'
+    ],
+    'Screen Acoustic': [
+        'Cascade™',
+        'Vicinity™ Workstation Screens',
+        'Cove™'
+    ]
+};
+
+// ═══════════════════════════════════════════════════
 // DATA & STATE
 // ═══════════════════════════════════════════════════
 const INSTALLERS = [
@@ -1029,6 +1187,8 @@ const INSTALLERS = [
 ];
 
 let rCounter = 0;
+let selectedMaterial = null;
+
 let state = {
     currentWork: 1,
     tracking: INSTALLERS.map(i=>({...i, replacements:[], usedReplacements:[]})),
@@ -1043,7 +1203,7 @@ let visibleInstallers = new Set(INSTALLERS.map(i=>i.id));
 let filterState = {
     searchQuery: '',
     status: '',
-    type: '',
+    materialCategory: '',
     dateFrom: '',
     dateTo: ''
 };
@@ -1051,6 +1211,87 @@ let filterState = {
 let currentCalendarDate = new Date();
 let editMode = false;
 let currentEditingJobId = null;
+let pendingEditFile = null;
+let shouldRemoveFile = false;
+
+// ═══════════════════════════════════════════════════
+// MATERIAL SEARCH FUNCTIONALITY
+// ═══════════════════════════════════════════════════
+const materialSearch = document.getElementById('materialSearch');
+const dropdownList = document.getElementById('dropdownList');
+const selectedMaterialDiv = document.getElementById('selectedMaterial');
+const selectedMaterialValue = document.getElementById('selectedMaterialValue');
+
+function renderDropdown(searchTerm = '') {
+    dropdownList.innerHTML = '';
+    const term = searchTerm.toLowerCase();
+    let hasResults = false;
+
+    for (const [category, items] of Object.entries(MATERIALS)) {
+        const filteredItems = items.filter(item => 
+            item.toLowerCase().includes(term)
+        );
+
+        if (filteredItems.length > 0) {
+            hasResults = true;
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'dropdown-category';
+            categoryDiv.textContent = category;
+            dropdownList.appendChild(categoryDiv);
+
+            filteredItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'dropdown-item';
+                itemDiv.textContent = item;
+                itemDiv.onclick = () => selectMaterial(category, item);
+                dropdownList.appendChild(itemDiv);
+            });
+        }
+    }
+
+    if (!hasResults && searchTerm) {
+        const noResults = document.createElement('div');
+        noResults.className = 'dropdown-item';
+        noResults.textContent = 'No materials found';
+        noResults.style.cursor = 'default';
+        noResults.style.color = 'var(--text-secondary)';
+        dropdownList.appendChild(noResults);
+    }
+}
+
+function selectMaterial(category, item) {
+    selectedMaterial = { category, item };
+    materialSearch.value = item;
+    selectedMaterialValue.textContent = `${category} - ${item}`;
+    selectedMaterialDiv.classList.add('active');
+    dropdownList.classList.remove('active');
+}
+
+materialSearch.addEventListener('focus', () => {
+    renderDropdown(materialSearch.value);
+    dropdownList.classList.add('active');
+});
+
+materialSearch.addEventListener('input', (e) => {
+    renderDropdown(e.target.value);
+    dropdownList.classList.add('active');
+    if (!e.target.value) {
+        selectedMaterial = null;
+        selectedMaterialDiv.classList.remove('active');
+    }
+});
+
+materialSearch.addEventListener('blur', (e) => {
+    setTimeout(() => {
+        dropdownList.classList.remove('active');
+    }, 200);
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-container')) {
+        dropdownList.classList.remove('active');
+    }
+});
 
 // ═══════════════════════════════════════════════════
 // MOBILE MENU
@@ -1062,7 +1303,6 @@ function toggleMobileMenu() {
     overlay.classList.toggle('active');
 }
 
-// Close menu when clicking nav items on mobile
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
         if(window.innerWidth <= 768) {
@@ -1122,10 +1362,9 @@ function showToast(msg) {
 function validateJobForm() {
     const client = document.getElementById('jobClient').value.trim();
     const address = document.getElementById('jobAddress').value.trim();
-    const type = document.getElementById('jobType').value;
     const date = document.getElementById('jobDate').value;
     
-    return client && address && type && date;
+    return client && address && selectedMaterial && date;
 }
 
 function validateDateRange(startDate, endDate) {
@@ -1306,7 +1545,7 @@ fileInput.addEventListener('change', (e)=>{
 
 document.getElementById('btnSaveJob').addEventListener('click', ()=>{
     if(!validateJobForm()) {
-        showToast("⚠️ Please complete required fields: Client, Address, Type, and Start Date");
+        showToast("⚠️ Please complete required fields: Client, Address, Material, and Start Date");
         return;
     }
 
@@ -1334,7 +1573,8 @@ document.getElementById('btnSaveJob').addEventListener('click', ()=>{
         id: Date.now(), 
         client: client, 
         address: addr,
-        type: document.getElementById('jobType').value,
+        materialCategory: selectedMaterial.category,
+        material: selectedMaterial.item,
         date: startDate,
         endDate: endDate || null,
         outsider: outsider || null,
@@ -1359,6 +1599,9 @@ document.getElementById('btnClearJob').addEventListener('click', ()=>{
     document.getElementById('jobEndDate').value = '';
     document.getElementById('jobOutsider').value = '';
     document.getElementById('fileName').textContent = '';
+    materialSearch.value = '';
+    selectedMaterial = null;
+    selectedMaterialDiv.classList.remove('active');
     hideDateError();
     pendingFile = null;
 });
@@ -1374,6 +1617,7 @@ function getFilteredJobs() {
         filtered = filtered.filter(job => 
             job.client.toLowerCase().includes(query) ||
             job.address.toLowerCase().includes(query) ||
+            (job.material && job.material.toLowerCase().includes(query)) ||
             (job.assignedTo && job.assignedTo.toLowerCase().includes(query))
         );
     }
@@ -1382,8 +1626,8 @@ function getFilteredJobs() {
         filtered = filtered.filter(job => job.status === filterState.status);
     }
     
-    if (filterState.type) {
-        filtered = filtered.filter(job => job.type === filterState.type);
+    if (filterState.materialCategory) {
+        filtered = filtered.filter(job => job.materialCategory === filterState.materialCategory);
     }
     
     if (filterState.dateFrom) {
@@ -1411,8 +1655,8 @@ document.getElementById('filterStatus').addEventListener('change', (e) => {
     renderJobs();
 });
 
-document.getElementById('filterType').addEventListener('change', (e) => {
-    filterState.type = e.target.value;
+document.getElementById('filterMaterialCategory').addEventListener('change', (e) => {
+    filterState.materialCategory = e.target.value;
     renderJobs();
 });
 
@@ -1430,14 +1674,14 @@ document.getElementById('btnClearFilters').addEventListener('click', () => {
     filterState = {
         searchQuery: '',
         status: '',
-        type: '',
+        materialCategory: '',
         dateFrom: '',
         dateTo: ''
     };
     
     document.getElementById('searchInput').value = '';
     document.getElementById('filterStatus').value = '';
-    document.getElementById('filterType').value = '';
+    document.getElementById('filterMaterialCategory').value = '';
     document.getElementById('filterDateFrom').value = '';
     document.getElementById('filterDateTo').value = '';
     
@@ -1481,6 +1725,7 @@ function renderJobs() {
                 </div>
                 <div style="margin-top: 4px;">
                     <span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span>
+                    ${job.material ? '<span class="material-badge">' + job.material + '</span>' : ''}
                     ${job.outsider ? '<span class="outsider-badge">HELPER: ' + job.outsider + '</span>' : ''}
                 </div>
                 ${job.assignedTo ? `
@@ -1519,23 +1764,47 @@ function renderJobDetails(id) {
     
     const jobHistory = state.history.filter(h => h.jobId === id);
     
-    // Toggle buttons visibility
     document.getElementById('btnEditMode').style.display = editMode ? 'none' : 'inline-flex';
     document.getElementById('btnSaveEdit').style.display = editMode ? 'inline-flex' : 'none';
     document.getElementById('btnCancelEdit').style.display = editMode ? 'inline-flex' : 'none';
     
     let downloadHtml = '';
-    if(job.fileUrl && job.fileName) {
+    if(editMode) {
+        // Edit mode - show file upload
         downloadHtml = `
-        <div class="detail-row full" style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0;">
-            <div class="detail-label" style="margin-bottom:8px;">Attached File</div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
-                <span style="font-weight:600; font-size:0.9rem;">${job.fileName}</span>
-                <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
+        <div class="detail-row full">
+            <div class="detail-label">Attached File</div>
+            ${job.fileUrl && job.fileName ? `
+                <div style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+                        <span style="font-weight:600; font-size:0.9rem;">📄 ${job.fileName}</span>
+                        <div style="display:flex; gap:8px;">
+                            <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
+                            <button class="btn btn-danger btn-sm" onclick="removeEditFile()">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+            <div class="file-upload-wrapper" id="editDropzone" style="padding:16px;">
+                <input type="file" id="editJobFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                <span id="editDropText">${job.fileUrl ? '📎 Replace file' : '📎 Click to attach file'}</span>
+                <div id="editFileName" class="file-name"></div>
             </div>
         </div>`;
     } else {
-        downloadHtml = `<div class="detail-row full"><div class="detail-label">File</div><div class="detail-content" style="color:#999;">No attachment</div></div>`;
+        // View mode - show download or no file message
+        if(job.fileUrl && job.fileName) {
+            downloadHtml = `
+            <div class="detail-row full" style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0;">
+                <div class="detail-label" style="margin-bottom:8px;">Attached File</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+                    <span style="font-weight:600; font-size:0.9rem;">📄 ${job.fileName}</span>
+                    <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
+                </div>
+            </div>`;
+        } else {
+            downloadHtml = `<div class="detail-row full"><div class="detail-label">File</div><div class="detail-content" style="color:#999;">No attachment</div></div>`;
+        }
     }
 
     let historyHtml = '';
@@ -1584,16 +1853,15 @@ function renderJobDetails(id) {
         </div>
         <div class="detail-row">
             <div class="detail-field">
-                <div class="detail-label">Type</div>
-                ${editMode 
-                    ? `<select class="detail-input" id="edit-type">
-                        <option value="Installation" ${job.type==='Installation'?'selected':''}>Installation</option>
-                        <option value="Maintenance" ${job.type==='Maintenance'?'selected':''}>Maintenance</option>
-                        <option value="Measurement" ${job.type==='Measurement'?'selected':''}>Measurement</option>
-                       </select>` 
-                    : `<div class="detail-content">${job.type}</div>`
-                }
+                <div class="detail-label">Material Category</div>
+                <div class="detail-content">${job.materialCategory || '-'}</div>
             </div>
+            <div class="detail-field">
+                <div class="detail-label">Material</div>
+                <div class="detail-content">${job.material || '-'}</div>
+            </div>
+        </div>
+        <div class="detail-row">
             <div class="detail-field">
                 <div class="detail-label">Start Date</div>
                 ${editMode 
@@ -1601,8 +1869,6 @@ function renderJobDetails(id) {
                     : `<div class="detail-content">${job.date || '-'}</div>`
                 }
             </div>
-        </div>
-        <div class="detail-row">
             <div class="detail-field">
                 <div class="detail-label">End Date</div>
                 ${editMode 
@@ -1610,6 +1876,8 @@ function renderJobDetails(id) {
                     : `<div class="detail-content">${job.endDate || '-'}</div>`
                 }
             </div>
+        </div>
+        <div class="detail-row">
             <div class="detail-field">
                 <div class="detail-label">Helper / Assistant</div>
                 ${editMode 
@@ -1617,15 +1885,15 @@ function renderJobDetails(id) {
                     : `<div class="detail-content">${job.outsider ? '👤 ' + job.outsider : '-'}</div>`
                 }
             </div>
+            <div class="detail-field">
+                <div class="detail-label">Status</div>
+                <div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div>
+            </div>
         </div>
         <div class="detail-row">
             <div class="detail-field">
                 <div class="detail-label">Assigned To</div>
                 <div class="detail-content" style="color:var(--accent); font-weight:700;">${job.assignedTo || '-'}</div>
-            </div>
-            <div class="detail-field">
-                <div class="detail-label">Status</div>
-                <div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div>
             </div>
         </div>
         ${downloadHtml}
@@ -1639,15 +1907,40 @@ function renderJobDetails(id) {
         ${historyHtml}
     `;
     document.getElementById('modalContent').innerHTML = html;
+    
+    // Setup file upload for edit mode
+    if(editMode) {
+        const editFileInput = document.getElementById('editJobFile');
+        const editDropzone = document.getElementById('editDropzone');
+        
+        editDropzone.addEventListener('click', () => editFileInput.click());
+        editFileInput.addEventListener('change', (e) => {
+            if(e.target.files[0]) {
+                pendingEditFile = e.target.files[0];
+                shouldRemoveFile = false;
+                document.getElementById('editFileName').textContent = "📄 " + pendingEditFile.name;
+            }
+        });
+    }
+}
+
+window.removeEditFile = function() {
+    shouldRemoveFile = true;
+    pendingEditFile = null;
+    renderJobDetails(currentEditingJobId);
 }
 
 document.getElementById('btnEditMode').addEventListener('click', () => {
     editMode = true;
+    pendingEditFile = null;
+    shouldRemoveFile = false;
     renderJobDetails(currentEditingJobId);
 });
 
 document.getElementById('btnCancelEdit').addEventListener('click', () => {
     editMode = false;
+    pendingEditFile = null;
+    shouldRemoveFile = false;
     renderJobDetails(currentEditingJobId);
 });
 
@@ -1665,13 +1958,26 @@ document.getElementById('btnSaveEdit').addEventListener('click', () => {
     
     job.client = document.getElementById('edit-client').value.trim();
     job.address = document.getElementById('edit-address').value.trim();
-    job.type = document.getElementById('edit-type').value;
     job.date = newStartDate;
     job.endDate = newEndDate || null;
     job.outsider = document.getElementById('edit-outsider').value.trim() || null;
     job.notes = document.getElementById('edit-notes').value;
     
+    // Handle file changes
+    if(shouldRemoveFile) {
+        // Remove the file
+        job.fileUrl = null;
+        job.fileName = null;
+    } else if(pendingEditFile) {
+        // Replace with new file
+        job.fileUrl = URL.createObjectURL(pendingEditFile);
+        job.fileName = pendingEditFile.name;
+    }
+    // If neither shouldRemoveFile nor pendingEditFile, keep existing file
+    
     editMode = false;
+    pendingEditFile = null;
+    shouldRemoveFile = false;
     renderJobDetails(currentEditingJobId);
     renderJobs();
     showToast("✅ Changes saved");
@@ -1681,6 +1987,8 @@ window.closeModal = function() {
     document.getElementById('detailModal').style.display = 'none';
     editMode = false;
     currentEditingJobId = null;
+    pendingEditFile = null;
+    shouldRemoveFile = false;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1730,7 +2038,7 @@ function renderCalendar() {
                     ? `${j.assignedTo}${j.outsider ? ' / ' + j.outsider : ''}: ${j.client.substring(0, 12)}`
                     : j.client.substring(0, 15);
                 return `
-                <div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client}">
+                <div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client} - ${j.material || ''}">
                     ${displayText}${displayText.length < (j.assignedTo ? j.assignedTo.length + j.client.length : j.client.length) ? '...' : ''}
                 </div>`;
             }).join('')}
@@ -1759,6 +2067,7 @@ function renderUpcomingJobs() {
                 <div style="font-weight:700; color:var(--primary)">${j.client}</div>
                 <div style="font-size:0.85rem; color:var(--text-light)">
                     👤 ${j.assignedTo}${j.outsider ? ' + ' + j.outsider : ''} • ${j.date}${j.endDate ? ' → ' + j.endDate : ''}
+                    ${j.material ? ' • ' + j.material : ''}
                 </div>
             </div>
             <button class="btn btn-outline btn-sm" onclick="viewDetails(${j.id})">View</button>
@@ -1868,18 +2177,19 @@ function updateCharts() {
     const ctx2 = document.getElementById('jobTypeChart').getContext('2d');
     if(jobTypeChartInstance) jobTypeChartInstance.destroy();
 
-    const typeCounts = {};
+    const categoryCounts = {};
     state.jobs.forEach(j => {
-        typeCounts[j.type] = (typeCounts[j.type] || 0) + 1;
+        const cat = j.materialCategory || 'Unknown';
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
     });
 
     jobTypeChartInstance = new Chart(ctx2, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(typeCounts),
+            labels: Object.keys(categoryCounts),
             datasets: [{
-                data: Object.values(typeCounts),
-                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B']
+                data: Object.values(categoryCounts),
+                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6']
             }]
         },
         options: {
@@ -1946,7 +2256,8 @@ document.getElementById('btnExportExcel').addEventListener('click', () => {
         ID: j.id,
         Client: j.client,
         Address: j.address,
-        Type: j.type,
+        MaterialCategory: j.materialCategory || '',
+        Material: j.material || '',
         StartDate: j.date,
         EndDate: j.endDate || '',
         Helper: j.outsider || '',
