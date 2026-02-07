@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rotation System – Nomadtika v3.2</title>
+<title>Rotation System – Nomadtika v3.3</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -42,10 +42,8 @@ body {
     overflow: hidden;
 }
 
-/* ── LAYOUT ── */
 .app-container { display: flex; width: 100%; height: 100%; }
 
-/* ── SIDEBAR ── */
 .sidebar {
     width: 260px;
     background: #F3F4F6;
@@ -71,7 +69,6 @@ body {
 .nav-item.active { background: var(--primary); color: #fff; box-shadow: var(--shadow); }
 .nav-item.locked { opacity: 0.5; cursor: not-allowed; }
 
-/* Mobile Menu */
 .mobile-header {
     display: none;
     background: var(--primary);
@@ -105,14 +102,12 @@ body {
     display: block;
 }
 
-/* ── MAIN ── */
 .main-content {
     flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); position: relative;
 }
 h2 { font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; letter-spacing: -0.02em; }
 h3 { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* ── UI COMPONENTS ── */
 .card {
     background: #fff; border: 1px solid var(--border); border-radius: 12px;
     padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow);
@@ -133,109 +128,89 @@ input.error, select.error { border-color: var(--danger); }
     margin-top: 4px;
 }
 
-/* Material Search Dropdown */
-.search-container {
+.material-search-container {
     position: relative;
 }
-
-.search-input {
+.material-search-input {
     width: 100%;
-    padding: 10px;
+    padding: 10px 36px 10px 10px;
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 0.9rem;
     transition: 0.2s;
     background: #fff;
-    font-family: var(--font-main);
 }
-
-.search-input:focus {
+.material-search-input:focus {
     border-color: var(--accent);
     outline: none;
     box-shadow: 0 0 0 3px rgba(0,155,119,0.1);
 }
-
-.search-input::placeholder {
+.material-search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--text-light);
+    pointer-events: none;
 }
-
-.dropdown-list {
+.material-dropdown {
+    display: none;
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    max-height: 250px;
-    overflow-y: auto;
     background: #fff;
     border: 1px solid var(--border);
-    border-top: none;
-    border-radius: 0 0 6px 6px;
-    z-index: 1000;
-    display: none;
+    border-radius: 6px;
+    margin-top: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
-
-.dropdown-list.active {
+.material-dropdown.show {
     display: block;
 }
-
-.dropdown-category {
-    padding: 8px 12px;
-    background: var(--bg-alt);
-    color: var(--accent);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border);
+.material-category {
     position: sticky;
     top: 0;
+    background: var(--bg-alt);
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    z-index: 2;
 }
-
-.dropdown-item {
+.material-option {
     padding: 10px 12px;
     cursor: pointer;
-    transition: all 0.2s;
-    border-bottom: 1px solid var(--bg-alt);
-    font-size: 0.85rem;
+    transition: background 0.2s;
+    font-size: 0.9rem;
 }
-
-.dropdown-item:hover {
+.material-option:hover {
     background: var(--bg-alt);
-    padding-left: 18px;
-    color: var(--accent);
 }
-
-.dropdown-item:last-child {
-    border-bottom: none;
-}
-
-.selected-material {
-    margin-top: 8px;
-    padding: 8px 12px;
+.material-option.selected {
     background: #ECFDF5;
-    border-left: 3px solid var(--accent);
-    border-radius: 4px;
-    font-size: 0.85rem;
-    display: none;
-}
-
-.selected-material.active {
-    display: block;
-}
-
-.selected-material .label {
-    color: var(--text-light);
-    font-size: 0.75rem;
-    margin-bottom: 4px;
-}
-
-.selected-material .value {
     color: var(--accent);
     font-weight: 600;
 }
+.material-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+.material-wall { background: #DBEAFE; color: #1E40AF; }
+.material-ceiling { background: #FEF3C7; color: #92400E; }
+.material-screen { background: #F3E8FF; color: #6B21A8; }
 
-/* File Upload */
 .file-upload-wrapper {
     border: 2px dashed var(--border); border-radius: 8px; padding: 24px;
     text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg-alt);
@@ -243,7 +218,55 @@ input.error, select.error { border-color: var(--danger); }
 .file-upload-wrapper:hover { border-color: var(--accent); background: #F0FDF4; }
 .file-name { margin-top: 8px; font-size: 0.85rem; color: var(--accent); font-weight: 600; }
 
-/* Buttons */
+.file-edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.file-current {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.file-current-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 150px;
+}
+.file-current-actions {
+    display: flex;
+    gap: 8px;
+}
+.file-upload-edit {
+    border: 2px dashed var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-alt);
+}
+.file-upload-edit:hover {
+    border-color: var(--accent);
+    background: #F0FDF4;
+}
+.file-removed-indicator {
+    padding: 8px 12px;
+    background: #FEE2E2;
+    border: 1px solid #FCA5A5;
+    border-radius: 6px;
+    color: #991B1B;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
 .btn {
     padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
     border: none; cursor: pointer; transition: 0.2s; display: inline-flex;
@@ -259,7 +282,6 @@ input.error, select.error { border-color: var(--danger); }
 .btn-warning { background: var(--warning); color: #fff; }
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
 
-/* Search & Filters Section */
 .search-filter-section {
     background: #fff; border: 1px solid var(--border); border-radius: 12px;
     padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow);
@@ -268,7 +290,7 @@ input.error, select.error { border-color: var(--danger); }
     position: relative;
     margin-bottom: 16px;
 }
-.search-bar-input {
+.search-input {
     width: 100%;
     padding: 12px 16px 12px 44px;
     border: 2px solid var(--border);
@@ -277,7 +299,7 @@ input.error, select.error { border-color: var(--danger); }
     transition: all 0.2s;
     background: var(--bg-alt);
 }
-.search-bar-input:focus {
+.search-input:focus {
     border-color: var(--accent);
     background: #fff;
     outline: none;
@@ -355,7 +377,6 @@ input.error, select.error { border-color: var(--danger); }
     padding: 8px 0;
 }
 
-/* Jobs List */
 .job-item {
     display: flex; justify-content: space-between; align-items: center;
     padding: 16px; border: 1px solid var(--border); border-radius: 8px;
@@ -383,11 +404,6 @@ input.error, select.error { border-color: var(--danger); }
     display: inline-block; padding: 4px 10px; border-radius: 20px;
     font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
     background: #EDE9FE; color: #6B21A8; margin-left: 8px;
-}
-.material-badge {
-    display: inline-block; padding: 4px 10px; border-radius: 20px;
-    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-    background: #DBEAFE; color: #1E40AF; margin-left: 8px;
 }
 .assigned-worker {
     display: inline-flex;
@@ -419,7 +435,6 @@ input.error, select.error { border-color: var(--danger); }
     opacity: 0.7;
 }
 
-/* Rotation UI */
 .installer-card {
     background: linear-gradient(135deg, var(--primary) 0%, #1F2937 100%);
     color: #fff; border-radius: 16px; padding: 40px; text-align: center;
@@ -433,7 +448,6 @@ input.error, select.error { border-color: var(--danger); }
     padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 20px;
 }
 
-/* Stats Filters */
 .filters-container { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .filter-chip {
     padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);
@@ -444,7 +458,6 @@ input.error, select.error { border-color: var(--danger); }
 .filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .chip-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
 
-/* Stats Cards */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -471,7 +484,6 @@ input.error, select.error { border-color: var(--danger); }
     letter-spacing: 0.05em;
 }
 
-/* Calendar Styles */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -529,7 +541,6 @@ input.error, select.error { border-color: var(--danger); }
     color: var(--primary);
 }
 
-/* Timeline View */
 .timeline-container {
     position: relative;
     padding: 20px 0;
@@ -591,7 +602,6 @@ input.error, select.error { border-color: var(--danger); }
     color: #991B1B;
 }
 
-/* Modal */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5); z-index: 100; display: none;
@@ -651,16 +661,35 @@ input.error, select.error { border-color: var(--danger); }
 }
 .toast.show { transform: translateY(0); opacity: 1; }
 
-/* Chart Container */
 .chart-container {
     position: relative;
     height: 350px;
     margin-bottom: 30px;
 }
 
-/* ══════════════════════════════════════════════════════ */
-/* RESPONSIVE DESIGN - MOBILE FIRST */
-/* ══════════════════════════════════════════════════════ */
+.time-filter-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.time-filter-btn {
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.time-filter-btn:hover {
+    background: var(--bg-alt);
+}
+.time-filter-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
 
 @media (max-width: 1024px) {
     .installer-card {
@@ -876,13 +905,12 @@ input.error, select.error { border-color: var(--danger); }
             </div>
         </div>
         <div style="font-size:0.75rem; color:var(--text-light);">
-            v3.2 - Nomadtika<br>&copy; 2026
+            v3.3 - Nomadtika<br>&copy; 2026
         </div>
     </div>
 
     <div class="main-content">
         
-        <!-- JOBS PANEL -->
         <div id="panel-jobs" class="panel active">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
                 <h2>Job Management</h2>
@@ -900,21 +928,14 @@ input.error, select.error { border-color: var(--danger); }
                         <input type="text" id="jobAddress" placeholder="Site address">
                     </div>
                     <div class="form-group full">
-                        <label>Material Type *</label>
-                        <div class="search-container">
-                            <input 
-                                type="text" 
-                                id="materialSearch" 
-                                class="search-input" 
-                                placeholder="Search material... (e.g., Frontier, Groove, Cascade)"
-                                autocomplete="off"
-                            >
-                            <div id="dropdownList" class="dropdown-list"></div>
+                        <label>Material Type * <span style="font-weight:400; color:var(--text-light)">(Search or select)</span></label>
+                        <div class="material-search-container">
+                            <input type="text" id="materialSearch" class="material-search-input" placeholder="Search material..." autocomplete="off">
+                            <span class="material-search-icon">🔍</span>
+                            <div class="material-dropdown" id="materialDropdown"></div>
                         </div>
-                        <div id="selectedMaterial" class="selected-material">
-                            <div class="label">Selected material:</div>
-                            <div class="value" id="selectedMaterialValue"></div>
-                        </div>
+                        <input type="hidden" id="selectedMaterial">
+                        <span class="error-message" id="materialError" style="display:none;">Please select a material type</span>
                     </div>
                     <div class="form-group">
                         <label>Start Date *</label>
@@ -928,6 +949,11 @@ input.error, select.error { border-color: var(--danger); }
                     <div class="form-group full">
                         <label>Helper / Assistant</label>
                         <input type="text" id="jobOutsider" placeholder="Name of the helper (optional)">
+                    </div>
+                    <div class="form-group full">
+                        <label>WBQ Rate (1-10) <span style="font-weight:400; color:var(--text-light)">(Optional)</span></label>
+                        <input type="number" id="jobWBQRate" min="1" max="10" step="1" placeholder="Rate from 1 to 10">
+                        <span class="error-message" id="wbqError" style="display:none;">Rate must be between 1 and 10</span>
                     </div>
                     <div class="form-group full">
                         <label>Attach File (PDF/IMG)</label>
@@ -948,11 +974,10 @@ input.error, select.error { border-color: var(--danger); }
                 </div>
             </div>
 
-            <!-- Search & Filter Section -->
             <div class="search-filter-section">
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" class="search-bar-input" placeholder="Search by client, address...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by client, address, material...">
                 </div>
                 <div class="filters-row">
                     <div class="filter-group">
@@ -967,9 +992,9 @@ input.error, select.error { border-color: var(--danger); }
                         <label class="filter-label">Material Category</label>
                         <select id="filterMaterialCategory" class="filter-select">
                             <option value="">All</option>
-                            <option value="Wall Acoustic">Wall Acoustic</option>
-                            <option value="Ceiling Acoustic">Ceiling Acoustic</option>
-                            <option value="Screen Acoustic">Screen Acoustic</option>
+                            <option value="Wall">Wall Acoustic</option>
+                            <option value="Ceiling">Ceiling Acoustic</option>
+                            <option value="Screen">Screen Acoustic</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -989,7 +1014,6 @@ input.error, select.error { border-color: var(--danger); }
             <div id="jobsList"></div>
         </div>
 
-        <!-- ROTATION PANEL -->
         <div id="panel-rotation" class="panel">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 12px;">
                 <h2>Active Rotation</h2>
@@ -1024,7 +1048,6 @@ input.error, select.error { border-color: var(--danger); }
             </div>
         </div>
 
-        <!-- CALENDAR PANEL -->
         <div id="panel-calendar" class="panel">
             <div class="calendar-controls">
                 <button class="btn btn-outline btn-sm" id="btnPrevMonth">← Previous</button>
@@ -1048,14 +1071,12 @@ input.error, select.error { border-color: var(--danger); }
             </div>
         </div>
 
-        <!-- STATISTICS PANEL -->
         <div id="panel-statistics" class="panel">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 12px;">
                 <h2>Statistics</h2>
                 <button class="btn btn-outline btn-sm" id="btnExportExcel">⬇ Export Excel</button>
             </div>
 
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="statTotalJobs">0</div>
@@ -1073,9 +1094,16 @@ input.error, select.error { border-color: var(--danger); }
                     <div class="stat-value" id="statAcceptRate">0%</div>
                     <div class="stat-label">Acceptance Rate</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statAvgWBQ">-</div>
+                    <div class="stat-label">Avg WBQ Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statRatedJobs">0</div>
+                    <div class="stat-label">Rated Jobs</div>
+                </div>
             </div>
 
-            <!-- Chart 1: Performance by Installer -->
             <div class="card">
                 <h3>Performance Comparison by Installer</h3>
                 <div class="filters-container" id="chartFilters"></div>
@@ -1090,19 +1118,42 @@ input.error, select.error { border-color: var(--danger); }
                 </div>
             </div>
 
-            <!-- Chart 2: Jobs by Material Category -->
             <div class="card">
                 <h3>Distribution by Material Category</h3>
                 <div class="chart-container" style="height: 300px;">
-                    <canvas id="jobTypeChart"></canvas>
+                    <canvas id="materialCategoryChart"></canvas>
                 </div>
             </div>
 
-            <!-- Chart 3: Acceptance Rate Over Time -->
             <div class="card">
                 <h3>Acceptance Rate by Installer</h3>
                 <div class="chart-container">
                     <canvas id="acceptanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Average WBQ Rate by Installer</h3>
+                <div class="chart-container">
+                    <canvas id="wbqInstallerChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Average WBQ Rate by Material Category</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="wbqMaterialChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>WBQ Rate Trends Over Time</h3>
+                <div class="time-filter-container">
+                    <button class="time-filter-btn active" data-period="weekly">Weekly</button>
+                    <button class="time-filter-btn" data-period="monthly">Monthly</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="wbqTrendChart"></canvas>
                 </div>
             </div>
         </div>
@@ -1110,7 +1161,6 @@ input.error, select.error { border-color: var(--danger); }
     </div>
 </div>
 
-<!-- Job Details Modal -->
 <div class="modal-overlay" id="detailModal">
     <div class="modal">
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items: center;">
@@ -1132,11 +1182,8 @@ input.error, select.error { border-color: var(--danger); }
 <div class="toast" id="toast">Notification</div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// MATERIALS DATA
-// ═══════════════════════════════════════════════════
 const MATERIALS = {
-    'Wall Acoustic': [
+    'Wall': [
         'Frontier™',
         'Composition®',
         'Groove Duet®',
@@ -1153,7 +1200,7 @@ const MATERIALS = {
         '3D Tiles',
         'Horizon™'
     ],
-    'Ceiling Acoustic': [
+    'Ceiling': [
         'Frontier™',
         'Groove Duet®',
         'Groove™ Panel',
@@ -1167,16 +1214,13 @@ const MATERIALS = {
         'Lattice™',
         'Cube™'
     ],
-    'Screen Acoustic': [
+    'Screen': [
         'Cascade™',
         'Vicinity™ Workstation Screens',
         'Cove™'
     ]
 };
 
-// ═══════════════════════════════════════════════════
-// DATA & STATE
-// ═══════════════════════════════════════════════════
 const INSTALLERS = [
   {id:1,name:'Daniel',priority:'P1'},
   {id:2,name:'Jimmy',priority:'P2'},
@@ -1187,8 +1231,6 @@ const INSTALLERS = [
 ];
 
 let rCounter = 0;
-let selectedMaterial = null;
-
 let state = {
     currentWork: 1,
     tracking: INSTALLERS.map(i=>({...i, replacements:[], usedReplacements:[]})),
@@ -1211,91 +1253,100 @@ let filterState = {
 let currentCalendarDate = new Date();
 let editMode = false;
 let currentEditingJobId = null;
-let pendingEditFile = null;
-let shouldRemoveFile = false;
+let selectedMaterialType = '';
+let editFileAction = null;
+let editNewFile = null;
+let wbqTrendPeriod = 'weekly';
 
-// ═══════════════════════════════════════════════════
-// MATERIAL SEARCH FUNCTIONALITY
-// ═══════════════════════════════════════════════════
-const materialSearch = document.getElementById('materialSearch');
-const dropdownList = document.getElementById('dropdownList');
-const selectedMaterialDiv = document.getElementById('selectedMaterial');
-const selectedMaterialValue = document.getElementById('selectedMaterialValue');
-
-function renderDropdown(searchTerm = '') {
-    dropdownList.innerHTML = '';
+function renderMaterialDropdown(searchTerm = '') {
+    const dropdown = document.getElementById('materialDropdown');
     const term = searchTerm.toLowerCase();
-    let hasResults = false;
-
-    for (const [category, items] of Object.entries(MATERIALS)) {
-        const filteredItems = items.filter(item => 
-            item.toLowerCase().includes(term)
+    let html = '';
+    
+    Object.keys(MATERIALS).forEach(category => {
+        const filteredMaterials = MATERIALS[category].filter(m => 
+            m.toLowerCase().includes(term)
         );
-
-        if (filteredItems.length > 0) {
-            hasResults = true;
-            const categoryDiv = document.createElement('div');
-            categoryDiv.className = 'dropdown-category';
-            categoryDiv.textContent = category;
-            dropdownList.appendChild(categoryDiv);
-
-            filteredItems.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'dropdown-item';
-                itemDiv.textContent = item;
-                itemDiv.onclick = () => selectMaterial(category, item);
-                dropdownList.appendChild(itemDiv);
+        
+        if (filteredMaterials.length > 0) {
+            html += `<div class="material-category">${category} Acoustic</div>`;
+            filteredMaterials.forEach(material => {
+                const fullName = `${category} - ${material}`;
+                const isSelected = selectedMaterialType === fullName;
+                html += `
+                    <div class="material-option ${isSelected ? 'selected' : ''}" 
+                         data-material="${fullName}" 
+                         onclick="selectMaterial('${fullName.replace(/'/g, "\\'")}')">
+                        ${material}
+                    </div>
+                `;
             });
         }
+    });
+    
+    if (html === '') {
+        html = '<div style="padding:12px; text-align:center; color:var(--text-light);">No materials found</div>';
     }
-
-    if (!hasResults && searchTerm) {
-        const noResults = document.createElement('div');
-        noResults.className = 'dropdown-item';
-        noResults.textContent = 'No materials found';
-        noResults.style.cursor = 'default';
-        noResults.style.color = 'var(--text-secondary)';
-        dropdownList.appendChild(noResults);
-    }
+    
+    dropdown.innerHTML = html;
 }
 
-function selectMaterial(category, item) {
-    selectedMaterial = { category, item };
-    materialSearch.value = item;
-    selectedMaterialValue.textContent = `${category} - ${item}`;
-    selectedMaterialDiv.classList.add('active');
-    dropdownList.classList.remove('active');
+window.selectMaterial = function(materialName) {
+    selectedMaterialType = materialName;
+    document.getElementById('selectedMaterial').value = materialName;
+    document.getElementById('materialSearch').value = materialName;
+    document.getElementById('materialDropdown').classList.remove('show');
+    hideMaterialError();
 }
 
-materialSearch.addEventListener('focus', () => {
-    renderDropdown(materialSearch.value);
-    dropdownList.classList.add('active');
+function showMaterialError() {
+    const errorEl = document.getElementById('materialError');
+    const searchInput = document.getElementById('materialSearch');
+    errorEl.style.display = 'block';
+    searchInput.classList.add('error');
+}
+
+function hideMaterialError() {
+    const errorEl = document.getElementById('materialError');
+    const searchInput = document.getElementById('materialSearch');
+    errorEl.style.display = 'none';
+    searchInput.classList.remove('error');
+}
+
+function getMaterialCategory(materialName) {
+    if (!materialName) return '';
+    return materialName.split(' - ')[0];
+}
+
+function getMaterialBadgeClass(category) {
+    if (category === 'Wall') return 'material-wall';
+    if (category === 'Ceiling') return 'material-ceiling';
+    if (category === 'Screen') return 'material-screen';
+    return '';
+}
+
+document.getElementById('materialSearch').addEventListener('input', (e) => {
+    const value = e.target.value;
+    selectedMaterialType = '';
+    document.getElementById('selectedMaterial').value = '';
+    renderMaterialDropdown(value);
+    document.getElementById('materialDropdown').classList.add('show');
 });
 
-materialSearch.addEventListener('input', (e) => {
-    renderDropdown(e.target.value);
-    dropdownList.classList.add('active');
-    if (!e.target.value) {
-        selectedMaterial = null;
-        selectedMaterialDiv.classList.remove('active');
-    }
-});
-
-materialSearch.addEventListener('blur', (e) => {
-    setTimeout(() => {
-        dropdownList.classList.remove('active');
-    }, 200);
+document.getElementById('materialSearch').addEventListener('focus', () => {
+    renderMaterialDropdown(document.getElementById('materialSearch').value);
+    document.getElementById('materialDropdown').classList.add('show');
 });
 
 document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-container')) {
-        dropdownList.classList.remove('active');
+    const container = document.querySelector('.material-search-container');
+    if (container && !container.contains(e.target)) {
+        document.getElementById('materialDropdown').classList.remove('show');
     }
 });
 
-// ═══════════════════════════════════════════════════
-// MOBILE MENU
-// ═══════════════════════════════════════════════════
+renderMaterialDropdown();
+
 function toggleMobileMenu() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobileOverlay');
@@ -1311,9 +1362,6 @@ document.querySelectorAll('.nav-item').forEach(item => {
     });
 });
 
-// ═══════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════
 function switchTab(tabId) {
     if(tabId === 'rotation' && state.activeJobId === null) {
         showToast("⚠️ Please select a job first");
@@ -1356,20 +1404,24 @@ function showToast(msg) {
     setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ═══════════════════════════════════════════════════
-// FORM VALIDATION
-// ═══════════════════════════════════════════════════
 function validateJobForm() {
     const client = document.getElementById('jobClient').value.trim();
     const address = document.getElementById('jobAddress').value.trim();
+    const material = document.getElementById('selectedMaterial').value;
     const date = document.getElementById('jobDate').value;
     
-    return client && address && selectedMaterial && date;
+    return client && address && material && date;
 }
 
 function validateDateRange(startDate, endDate) {
     if(!startDate || !endDate) return true;
     return endDate >= startDate;
+}
+
+function validateWBQRate(rate) {
+    if (!rate) return true;
+    const num = parseInt(rate);
+    return num >= 1 && num <= 10;
 }
 
 function showDateError() {
@@ -1384,6 +1436,20 @@ function hideDateError() {
     const endDateInput = document.getElementById('jobEndDate');
     errorEl.style.display = 'none';
     endDateInput.classList.remove('error');
+}
+
+function showWBQError() {
+    const errorEl = document.getElementById('wbqError');
+    const wbqInput = document.getElementById('jobWBQRate');
+    errorEl.style.display = 'block';
+    wbqInput.classList.add('error');
+}
+
+function hideWBQError() {
+    const errorEl = document.getElementById('wbqError');
+    const wbqInput = document.getElementById('jobWBQRate');
+    errorEl.style.display = 'none';
+    wbqInput.classList.remove('error');
 }
 
 document.getElementById('jobDate').addEventListener('change', () => {
@@ -1406,9 +1472,15 @@ document.getElementById('jobEndDate').addEventListener('change', () => {
     }
 });
 
-// ═══════════════════════════════════════════════════
-// ROTATION LOGIC
-// ═══════════════════════════════════════════════════
+document.getElementById('jobWBQRate').addEventListener('input', (e) => {
+    const value = e.target.value;
+    if(validateWBQRate(value)) {
+        hideWBQError();
+    } else {
+        showWBQError();
+    }
+});
+
 function getById(id){ return state.tracking.find(i=>i.id===id) }
 function getCurrentInstaller(){ return ((state.currentWork-1)%6)+1 }
 
@@ -1528,9 +1600,6 @@ function renderRotation() {
     }).join('');
 }
 
-// ═══════════════════════════════════════════════════
-// JOB MANAGEMENT
-// ═══════════════════════════════════════════════════
 const fileInput = document.getElementById('jobFile');
 const dropzone = document.getElementById('dropzone');
 let pendingFile = null;
@@ -1545,7 +1614,10 @@ fileInput.addEventListener('change', (e)=>{
 
 document.getElementById('btnSaveJob').addEventListener('click', ()=>{
     if(!validateJobForm()) {
-        showToast("⚠️ Please complete required fields: Client, Address, Material, and Start Date");
+        if(!document.getElementById('selectedMaterial').value) {
+            showMaterialError();
+        }
+        showToast("⚠️ Please complete required fields: Client, Address, Material Type, and Start Date");
         return;
     }
 
@@ -1558,9 +1630,17 @@ document.getElementById('btnSaveJob').addEventListener('click', ()=>{
         return;
     }
 
+    const wbqRate = document.getElementById('jobWBQRate').value;
+    if(!validateWBQRate(wbqRate)) {
+        showToast("⚠️ WBQ Rate must be between 1 and 10");
+        showWBQError();
+        return;
+    }
+
     const client = document.getElementById('jobClient').value.trim();
     const addr = document.getElementById('jobAddress').value.trim();
     const outsider = document.getElementById('jobOutsider').value.trim();
+    const materialType = document.getElementById('selectedMaterial').value;
 
     let fileUrl = null;
     let fileName = null;
@@ -1573,11 +1653,11 @@ document.getElementById('btnSaveJob').addEventListener('click', ()=>{
         id: Date.now(), 
         client: client, 
         address: addr,
-        materialCategory: selectedMaterial.category,
-        material: selectedMaterial.item,
+        materialType: materialType,
         date: startDate,
         endDate: endDate || null,
         outsider: outsider || null,
+        wbqRate: wbqRate ? parseInt(wbqRate) : null,
         notes: document.getElementById('jobNotes').value,
         fileName: fileName,
         fileUrl: fileUrl,
@@ -1598,17 +1678,17 @@ document.getElementById('btnClearJob').addEventListener('click', ()=>{
     document.getElementById('jobNotes').value = '';
     document.getElementById('jobEndDate').value = '';
     document.getElementById('jobOutsider').value = '';
+    document.getElementById('jobWBQRate').value = '';
+    document.getElementById('materialSearch').value = '';
+    document.getElementById('selectedMaterial').value = '';
     document.getElementById('fileName').textContent = '';
-    materialSearch.value = '';
-    selectedMaterial = null;
-    selectedMaterialDiv.classList.remove('active');
+    selectedMaterialType = '';
     hideDateError();
+    hideMaterialError();
+    hideWBQError();
     pendingFile = null;
 });
 
-// ═══════════════════════════════════════════════════
-// SEARCH & FILTER
-// ═══════════════════════════════════════════════════
 function getFilteredJobs() {
     let filtered = [...state.jobs];
     
@@ -1617,8 +1697,8 @@ function getFilteredJobs() {
         filtered = filtered.filter(job => 
             job.client.toLowerCase().includes(query) ||
             job.address.toLowerCase().includes(query) ||
-            (job.material && job.material.toLowerCase().includes(query)) ||
-            (job.assignedTo && job.assignedTo.toLowerCase().includes(query))
+            (job.assignedTo && job.assignedTo.toLowerCase().includes(query)) ||
+            (job.materialType && job.materialType.toLowerCase().includes(query))
         );
     }
     
@@ -1627,7 +1707,9 @@ function getFilteredJobs() {
     }
     
     if (filterState.materialCategory) {
-        filtered = filtered.filter(job => job.materialCategory === filterState.materialCategory);
+        filtered = filtered.filter(job => 
+            job.materialType && getMaterialCategory(job.materialType) === filterState.materialCategory
+        );
     }
     
     if (filterState.dateFrom) {
@@ -1716,7 +1798,11 @@ function renderJobs() {
         return;
     }
     
-    list.innerHTML = filteredJobs.slice().reverse().map(job => `
+    list.innerHTML = filteredJobs.slice().reverse().map(job => {
+        const materialCategory = getMaterialCategory(job.materialType);
+        const badgeClass = getMaterialBadgeClass(materialCategory);
+        
+        return `
         <div class="job-item">
             <div class="job-item-content">
                 <div style="font-weight:700; color:var(--primary)">${job.client}</div>
@@ -1725,12 +1811,13 @@ function renderJobs() {
                 </div>
                 <div style="margin-top: 4px;">
                     <span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span>
-                    ${job.material ? '<span class="material-badge">' + job.material + '</span>' : ''}
+                    ${job.materialType ? `<span class="material-badge ${badgeClass}">${job.materialType}</span>` : ''}
                     ${job.outsider ? '<span class="outsider-badge">HELPER: ' + job.outsider + '</span>' : ''}
                 </div>
                 ${job.assignedTo ? `
                 <div class="assigned-worker">
                     👤 Assigned to: ${job.assignedTo}${job.outsider ? ' + ' + job.outsider : ''}
+                    ${job.wbqRate ? ` • ⭐ ${job.wbqRate}/10` : ''}
                 </div>
                 ` : ''}
             </div>
@@ -1741,7 +1828,7 @@ function renderJobs() {
                 }
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 window.startRotation = function(id) {
@@ -1754,6 +1841,8 @@ window.startRotation = function(id) {
 window.viewDetails = function(id) {
     currentEditingJobId = id;
     editMode = false;
+    editFileAction = null;
+    editNewFile = null;
     renderJobDetails(id);
     document.getElementById('detailModal').style.display = 'flex';
 }
@@ -1768,33 +1857,65 @@ function renderJobDetails(id) {
     document.getElementById('btnSaveEdit').style.display = editMode ? 'inline-flex' : 'none';
     document.getElementById('btnCancelEdit').style.display = editMode ? 'inline-flex' : 'none';
     
-    let downloadHtml = '';
-    if(editMode) {
-        // Edit mode - show file upload
-        downloadHtml = `
-        <div class="detail-row full">
-            <div class="detail-label">Attached File</div>
-            ${job.fileUrl && job.fileName ? `
-                <div style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0; margin-bottom:12px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
-                        <span style="font-weight:600; font-size:0.9rem;">📄 ${job.fileName}</span>
-                        <div style="display:flex; gap:8px;">
+    const materialCategory = getMaterialCategory(job.materialType);
+    const badgeClass = getMaterialBadgeClass(materialCategory);
+    
+    let fileHtml = '';
+    if (editMode) {
+        if (job.fileUrl && job.fileName && editFileAction !== 'remove') {
+            fileHtml = `
+            <div class="detail-row full">
+                <div class="detail-label">Attached File</div>
+                <div class="file-edit-container">
+                    <div class="file-current">
+                        <span class="file-current-name">📄 ${job.fileName}</span>
+                        <div class="file-current-actions">
                             <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
                             <button class="btn btn-danger btn-sm" onclick="removeEditFile()">🗑️ Remove</button>
                         </div>
                     </div>
+                    ${editNewFile ? `
+                    <div style="padding:8px 12px; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:6px; color:#047857; font-size:0.85rem;">
+                        ✓ New file will replace current: ${editNewFile.name}
+                    </div>
+                    ` : `
+                    <div class="file-upload-edit" id="editFileUpload">
+                        <input type="file" id="editFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                        <span>Click to replace with new file</span>
+                    </div>
+                    `}
                 </div>
-            ` : ''}
-            <div class="file-upload-wrapper" id="editDropzone" style="padding:16px;">
-                <input type="file" id="editJobFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
-                <span id="editDropText">${job.fileUrl ? '📎 Replace file' : '📎 Click to attach file'}</span>
-                <div id="editFileName" class="file-name"></div>
-            </div>
-        </div>`;
+            </div>`;
+        } else if (editFileAction === 'remove') {
+            fileHtml = `
+            <div class="detail-row full">
+                <div class="detail-label">Attached File</div>
+                <div class="file-edit-container">
+                    <div class="file-removed-indicator">
+                        🗑️ File will be removed when you save changes
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="undoRemoveFile()" style="width:100%;">↶ Undo Remove</button>
+                </div>
+            </div>`;
+        } else {
+            fileHtml = `
+            <div class="detail-row full">
+                <div class="detail-label">Attached File</div>
+                ${editNewFile ? `
+                <div style="padding:8px 12px; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:6px; color:#047857; font-size:0.85rem;">
+                    ✓ New file selected: ${editNewFile.name}
+                </div>
+                ` : `
+                <div class="file-upload-edit" id="editFileUpload">
+                    <input type="file" id="editFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                    <span>Click to attach file</span>
+                </div>
+                `}
+            </div>`;
+        }
     } else {
-        // View mode - show download or no file message
         if(job.fileUrl && job.fileName) {
-            downloadHtml = `
+            fileHtml = `
             <div class="detail-row full" style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0;">
                 <div class="detail-label" style="margin-bottom:8px;">Attached File</div>
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
@@ -1803,7 +1924,7 @@ function renderJobDetails(id) {
                 </div>
             </div>`;
         } else {
-            downloadHtml = `<div class="detail-row full"><div class="detail-label">File</div><div class="detail-content" style="color:#999;">No attachment</div></div>`;
+            fileHtml = `<div class="detail-row full"><div class="detail-label">File</div><div class="detail-content" style="color:#999;">No attachment</div></div>`;
         }
     }
 
@@ -1851,14 +1972,21 @@ function renderJobDetails(id) {
                 }
             </div>
         </div>
-        <div class="detail-row">
+        <div class="detail-row full">
             <div class="detail-field">
-                <div class="detail-label">Material Category</div>
-                <div class="detail-content">${job.materialCategory || '-'}</div>
-            </div>
-            <div class="detail-field">
-                <div class="detail-label">Material</div>
-                <div class="detail-content">${job.material || '-'}</div>
+                <div class="detail-label">Material Type</div>
+                ${editMode ? `
+                    <div class="material-search-container">
+                        <input type="text" id="editMaterialSearch" class="material-search-input" placeholder="Search material..." autocomplete="off" value="${job.materialType}">
+                        <span class="material-search-icon">🔍</span>
+                        <div class="material-dropdown" id="editMaterialDropdown"></div>
+                    </div>
+                    <input type="hidden" id="editSelectedMaterial" value="${job.materialType}">
+                ` : `
+                    <div class="detail-content">
+                        <span class="material-badge ${badgeClass}">${job.materialType}</span>
+                    </div>
+                `}
             </div>
         </div>
         <div class="detail-row">
@@ -1886,8 +2014,11 @@ function renderJobDetails(id) {
                 }
             </div>
             <div class="detail-field">
-                <div class="detail-label">Status</div>
-                <div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div>
+                <div class="detail-label">WBQ Rate (1-10)</div>
+                ${editMode 
+                    ? `<input type="number" class="detail-input" id="edit-wbqrate" min="1" max="10" step="1" value="${job.wbqRate||''}" placeholder="1-10">` 
+                    : `<div class="detail-content">${job.wbqRate ? '⭐ ' + job.wbqRate + '/10' : '-'}</div>`
+                }
             </div>
         </div>
         <div class="detail-row">
@@ -1895,8 +2026,12 @@ function renderJobDetails(id) {
                 <div class="detail-label">Assigned To</div>
                 <div class="detail-content" style="color:var(--accent); font-weight:700;">${job.assignedTo || '-'}</div>
             </div>
+            <div class="detail-field">
+                <div class="detail-label">Status</div>
+                <div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div>
+            </div>
         </div>
-        ${downloadHtml}
+        ${fileHtml}
         <div class="detail-row full">
             <div class="detail-label">Notes</div>
             ${editMode 
@@ -1908,39 +2043,106 @@ function renderJobDetails(id) {
     `;
     document.getElementById('modalContent').innerHTML = html;
     
-    // Setup file upload for edit mode
-    if(editMode) {
-        const editFileInput = document.getElementById('editJobFile');
-        const editDropzone = document.getElementById('editDropzone');
+    if (editMode) {
+        const editFileUpload = document.getElementById('editFileUpload');
+        const editFileInput = document.getElementById('editFile');
+        if (editFileUpload && editFileInput) {
+            editFileUpload.addEventListener('click', () => editFileInput.click());
+            editFileInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    editNewFile = e.target.files[0];
+                    editFileAction = 'replace';
+                    renderJobDetails(currentEditingJobId);
+                }
+            });
+        }
         
-        editDropzone.addEventListener('click', () => editFileInput.click());
-        editFileInput.addEventListener('change', (e) => {
-            if(e.target.files[0]) {
-                pendingEditFile = e.target.files[0];
-                shouldRemoveFile = false;
-                document.getElementById('editFileName').textContent = "📄 " + pendingEditFile.name;
+        let editSelectedMaterial = job.materialType;
+        
+        const editMaterialSearch = document.getElementById('editMaterialSearch');
+        const editMaterialDropdown = document.getElementById('editMaterialDropdown');
+        
+        function renderEditMaterialDropdown(searchTerm = '') {
+            const term = searchTerm.toLowerCase();
+            let html = '';
+            
+            Object.keys(MATERIALS).forEach(category => {
+                const filteredMaterials = MATERIALS[category].filter(m => 
+                    m.toLowerCase().includes(term)
+                );
+                
+                if (filteredMaterials.length > 0) {
+                    html += `<div class="material-category">${category} Acoustic</div>`;
+                    filteredMaterials.forEach(material => {
+                        const fullName = `${category} - ${material}`;
+                        const isSelected = editSelectedMaterial === fullName;
+                        html += `
+                            <div class="material-option ${isSelected ? 'selected' : ''}" 
+                                 data-material="${fullName}">
+                                ${material}
+                            </div>
+                        `;
+                    });
+                }
+            });
+            
+            if (html === '') {
+                html = '<div style="padding:12px; text-align:center; color:var(--text-light);">No materials found</div>';
             }
+            
+            editMaterialDropdown.innerHTML = html;
+            
+            editMaterialDropdown.querySelectorAll('.material-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const materialName = option.getAttribute('data-material');
+                    editSelectedMaterial = materialName;
+                    document.getElementById('editSelectedMaterial').value = materialName;
+                    editMaterialSearch.value = materialName;
+                    editMaterialDropdown.classList.remove('show');
+                });
+            });
+        }
+        
+        editMaterialSearch.addEventListener('input', (e) => {
+            const value = e.target.value;
+            editSelectedMaterial = '';
+            document.getElementById('editSelectedMaterial').value = '';
+            renderEditMaterialDropdown(value);
+            editMaterialDropdown.classList.add('show');
         });
+        
+        editMaterialSearch.addEventListener('focus', () => {
+            renderEditMaterialDropdown(editMaterialSearch.value);
+            editMaterialDropdown.classList.add('show');
+        });
+        
+        renderEditMaterialDropdown();
     }
 }
 
 window.removeEditFile = function() {
-    shouldRemoveFile = true;
-    pendingEditFile = null;
+    editFileAction = 'remove';
+    editNewFile = null;
+    renderJobDetails(currentEditingJobId);
+}
+
+window.undoRemoveFile = function() {
+    editFileAction = null;
+    editNewFile = null;
     renderJobDetails(currentEditingJobId);
 }
 
 document.getElementById('btnEditMode').addEventListener('click', () => {
     editMode = true;
-    pendingEditFile = null;
-    shouldRemoveFile = false;
+    editFileAction = null;
+    editNewFile = null;
     renderJobDetails(currentEditingJobId);
 });
 
 document.getElementById('btnCancelEdit').addEventListener('click', () => {
     editMode = false;
-    pendingEditFile = null;
-    shouldRemoveFile = false;
+    editFileAction = null;
+    editNewFile = null;
     renderJobDetails(currentEditingJobId);
 });
 
@@ -1956,28 +2158,32 @@ document.getElementById('btnSaveEdit').addEventListener('click', () => {
         return;
     }
     
+    const newWBQRate = document.getElementById('edit-wbqrate').value;
+    if(!validateWBQRate(newWBQRate)) {
+        showToast("⚠️ WBQ Rate must be between 1 and 10");
+        return;
+    }
+    
     job.client = document.getElementById('edit-client').value.trim();
     job.address = document.getElementById('edit-address').value.trim();
+    job.materialType = document.getElementById('editSelectedMaterial').value;
     job.date = newStartDate;
     job.endDate = newEndDate || null;
     job.outsider = document.getElementById('edit-outsider').value.trim() || null;
+    job.wbqRate = newWBQRate ? parseInt(newWBQRate) : null;
     job.notes = document.getElementById('edit-notes').value;
     
-    // Handle file changes
-    if(shouldRemoveFile) {
-        // Remove the file
-        job.fileUrl = null;
+    if (editFileAction === 'remove') {
         job.fileName = null;
-    } else if(pendingEditFile) {
-        // Replace with new file
-        job.fileUrl = URL.createObjectURL(pendingEditFile);
-        job.fileName = pendingEditFile.name;
+        job.fileUrl = null;
+    } else if (editNewFile) {
+        job.fileUrl = URL.createObjectURL(editNewFile);
+        job.fileName = editNewFile.name;
     }
-    // If neither shouldRemoveFile nor pendingEditFile, keep existing file
     
     editMode = false;
-    pendingEditFile = null;
-    shouldRemoveFile = false;
+    editFileAction = null;
+    editNewFile = null;
     renderJobDetails(currentEditingJobId);
     renderJobs();
     showToast("✅ Changes saved");
@@ -1986,14 +2192,11 @@ document.getElementById('btnSaveEdit').addEventListener('click', () => {
 window.closeModal = function() { 
     document.getElementById('detailModal').style.display = 'none';
     editMode = false;
+    editFileAction = null;
+    editNewFile = null;
     currentEditingJobId = null;
-    pendingEditFile = null;
-    shouldRemoveFile = false;
 }
 
-// ═══════════════════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════════════════
 function renderCalendar() {
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
@@ -2038,7 +2241,7 @@ function renderCalendar() {
                     ? `${j.assignedTo}${j.outsider ? ' / ' + j.outsider : ''}: ${j.client.substring(0, 12)}`
                     : j.client.substring(0, 15);
                 return `
-                <div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client} - ${j.material || ''}">
+                <div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client}">
                     ${displayText}${displayText.length < (j.assignedTo ? j.assignedTo.length + j.client.length : j.client.length) ? '...' : ''}
                 </div>`;
             }).join('')}
@@ -2067,7 +2270,7 @@ function renderUpcomingJobs() {
                 <div style="font-weight:700; color:var(--primary)">${j.client}</div>
                 <div style="font-size:0.85rem; color:var(--text-light)">
                     👤 ${j.assignedTo}${j.outsider ? ' + ' + j.outsider : ''} • ${j.date}${j.endDate ? ' → ' + j.endDate : ''}
-                    ${j.material ? ' • ' + j.material : ''}
+                    ${j.wbqRate ? ` • ⭐ ${j.wbqRate}/10` : ''}
                 </div>
             </div>
             <button class="btn btn-outline btn-sm" onclick="viewDetails(${j.id})">View</button>
@@ -2085,9 +2288,6 @@ document.getElementById('btnNextMonth').addEventListener('click', () => {
     renderCalendar();
 });
 
-// ═══════════════════════════════════════════════════
-// STATISTICS
-// ═══════════════════════════════════════════════════
 function updateStats() {
     const total = state.jobs.length;
     const pending = state.jobs.filter(j => j.status === 'Pending').length;
@@ -2097,15 +2297,24 @@ function updateStats() {
     const acceptedResponses = state.history.filter(h => h.response === 'YES').length;
     const acceptRate = totalResponses > 0 ? Math.round((acceptedResponses / totalResponses) * 100) : 0;
     
+    const ratedJobs = state.jobs.filter(j => j.wbqRate !== null && j.wbqRate !== undefined);
+    const totalWBQ = ratedJobs.reduce((sum, j) => sum + j.wbqRate, 0);
+    const avgWBQ = ratedJobs.length > 0 ? (totalWBQ / ratedJobs.length).toFixed(1) : '-';
+    
     document.getElementById('statTotalJobs').textContent = total;
     document.getElementById('statPending').textContent = pending;
     document.getElementById('statAssigned').textContent = assigned;
     document.getElementById('statAcceptRate').textContent = acceptRate + '%';
+    document.getElementById('statAvgWBQ').textContent = avgWBQ === '-' ? avgWBQ : avgWBQ + '/10';
+    document.getElementById('statRatedJobs').textContent = ratedJobs.length;
 }
 
 let chartInstance = null;
-let jobTypeChartInstance = null;
+let materialCategoryChartInstance = null;
 let acceptanceChartInstance = null;
+let wbqInstallerChartInstance = null;
+let wbqMaterialChartInstance = null;
+let wbqTrendChartInstance = null;
 
 function renderFilters() {
     const container = document.getElementById('chartFilters');
@@ -2174,22 +2383,24 @@ function updateCharts() {
         }
     });
 
-    const ctx2 = document.getElementById('jobTypeChart').getContext('2d');
-    if(jobTypeChartInstance) jobTypeChartInstance.destroy();
+    const ctx2 = document.getElementById('materialCategoryChart').getContext('2d');
+    if(materialCategoryChartInstance) materialCategoryChartInstance.destroy();
 
-    const categoryCounts = {};
+    const categoryCounts = { Wall: 0, Ceiling: 0, Screen: 0 };
     state.jobs.forEach(j => {
-        const cat = j.materialCategory || 'Unknown';
-        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        const category = getMaterialCategory(j.materialType);
+        if (category && categoryCounts.hasOwnProperty(category)) {
+            categoryCounts[category]++;
+        }
     });
 
-    jobTypeChartInstance = new Chart(ctx2, {
+    materialCategoryChartInstance = new Chart(ctx2, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(categoryCounts),
+            labels: ['Wall Acoustic', 'Ceiling Acoustic', 'Screen Acoustic'],
             datasets: [{
-                data: Object.values(categoryCounts),
-                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6']
+                data: [categoryCounts.Wall, categoryCounts.Ceiling, categoryCounts.Screen],
+                backgroundColor: ['#3B82F6', '#F59E0B', '#8B5CF6']
             }]
         },
         options: {
@@ -2242,11 +2453,206 @@ function updateCharts() {
             }
         }
     });
+
+    const ctx4 = document.getElementById('wbqInstallerChart').getContext('2d');
+    if(wbqInstallerChartInstance) wbqInstallerChartInstance.destroy();
+
+    const wbqByInstaller = INSTALLERS.map(ins => {
+        const jobs = state.jobs.filter(j => j.assignedTo === ins.name && j.wbqRate);
+        if (jobs.length === 0) return 0;
+        const total = jobs.reduce((sum, j) => sum + j.wbqRate, 0);
+        return (total / jobs.length).toFixed(1);
+    });
+
+    wbqInstallerChartInstance = new Chart(ctx4, {
+        type: 'bar',
+        data: {
+            labels: INSTALLERS.map(i => i.name),
+            datasets: [{
+                label: 'Average WBQ Rate',
+                data: wbqByInstaller,
+                backgroundColor: '#10B981'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '/10';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    const ctx5 = document.getElementById('wbqMaterialChart').getContext('2d');
+    if(wbqMaterialChartInstance) wbqMaterialChartInstance.destroy();
+
+    const wbqByCategory = { Wall: [], Ceiling: [], Screen: [] };
+    state.jobs.forEach(j => {
+        if (j.wbqRate) {
+            const category = getMaterialCategory(j.materialType);
+            if (category && wbqByCategory[category]) {
+                wbqByCategory[category].push(j.wbqRate);
+            }
+        }
+    });
+
+    const avgWBQByCategory = {
+        Wall: wbqByCategory.Wall.length > 0 ? (wbqByCategory.Wall.reduce((a, b) => a + b, 0) / wbqByCategory.Wall.length).toFixed(1) : 0,
+        Ceiling: wbqByCategory.Ceiling.length > 0 ? (wbqByCategory.Ceiling.reduce((a, b) => a + b, 0) / wbqByCategory.Ceiling.length).toFixed(1) : 0,
+        Screen: wbqByCategory.Screen.length > 0 ? (wbqByCategory.Screen.reduce((a, b) => a + b, 0) / wbqByCategory.Screen.length).toFixed(1) : 0
+    };
+
+    wbqMaterialChartInstance = new Chart(ctx5, {
+        type: 'doughnut',
+        data: {
+            labels: ['Wall Acoustic', 'Ceiling Acoustic', 'Screen Acoustic'],
+            datasets: [{
+                data: [avgWBQByCategory.Wall, avgWBQByCategory.Ceiling, avgWBQByCategory.Screen],
+                backgroundColor: ['#3B82F6', '#F59E0B', '#8B5CF6']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + '/10';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    updateWBQTrendChart();
 }
 
-// ═══════════════════════════════════════════════════
-// EXPORT
-// ═══════════════════════════════════════════════════
+function updateWBQTrendChart() {
+    const ctx6 = document.getElementById('wbqTrendChart').getContext('2d');
+    if(wbqTrendChartInstance) wbqTrendChartInstance.destroy();
+
+    const ratedJobs = state.jobs.filter(j => j.wbqRate && j.date).sort((a, b) => a.date.localeCompare(b.date));
+    
+    if (ratedJobs.length === 0) {
+        wbqTrendChartInstance = new Chart(ctx6, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Average WBQ Rate',
+                    data: [],
+                    borderColor: '#009B77',
+                    backgroundColor: 'rgba(0, 155, 119, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                }
+            }
+        });
+        return;
+    }
+
+    const groupedData = {};
+    
+    ratedJobs.forEach(job => {
+        const date = new Date(job.date);
+        let key;
+        
+        if (wbqTrendPeriod === 'weekly') {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+            key = `${date.getFullYear()}-W${weekNum}`;
+        } else {
+            key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+        
+        if (!groupedData[key]) {
+            groupedData[key] = [];
+        }
+        groupedData[key].push(job.wbqRate);
+    });
+
+    const labels = Object.keys(groupedData).sort();
+    const data = labels.map(label => {
+        const rates = groupedData[label];
+        return (rates.reduce((a, b) => a + b, 0) / rates.length).toFixed(1);
+    });
+
+    wbqTrendChartInstance = new Chart(ctx6, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average WBQ Rate',
+                data: data,
+                borderColor: '#009B77',
+                backgroundColor: 'rgba(0, 155, 119, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '/10';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Avg: ' + context.parsed.y + '/10';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+document.querySelectorAll('.time-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        wbqTrendPeriod = e.target.getAttribute('data-period');
+        updateWBQTrendChart();
+    });
+});
+
 document.getElementById('btnExportExcel').addEventListener('click', () => {
     if(typeof XLSX === 'undefined') { showToast("Error: Excel library not loaded"); return; }
     
@@ -2256,11 +2662,11 @@ document.getElementById('btnExportExcel').addEventListener('click', () => {
         ID: j.id,
         Client: j.client,
         Address: j.address,
-        MaterialCategory: j.materialCategory || '',
-        Material: j.material || '',
+        MaterialType: j.materialType || '',
         StartDate: j.date,
         EndDate: j.endDate || '',
         Helper: j.outsider || '',
+        WBQRate: j.wbqRate || '',
         Status: j.status,
         AssignedTo: j.assignedTo || '',
         Notes: j.notes
@@ -2283,7 +2689,6 @@ document.getElementById('btnExportExcel').addEventListener('click', () => {
     showToast("📊 Excel downloaded");
 });
 
-// Init
 renderJobs();
 </script>
 </body>
