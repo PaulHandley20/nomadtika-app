@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rotation System – Nomadtika v3.3</title>
+<title>Nomadtika App v4.6 (Full + Skill Filters)</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -24,6 +24,7 @@
     --success: #10B981;
     --info: #3B82F6;
     --warning: #F59E0B;
+    --priority: #000000; /* Color Prioridad Nomadtika */
     
     --radius: 8px;
     --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -31,7 +32,11 @@
     --font-mono: 'JetBrains Mono', monospace;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
 
 body {
     font-family: var(--font-main);
@@ -42,28 +47,56 @@ body {
     overflow: hidden;
 }
 
-.app-container { display: flex; width: 100%; height: 100%; }
+.app-container { 
+    display: flex; 
+    width: 100%; 
+    height: 100%; 
+}
 
 .sidebar {
     width: 260px;
     background: #F3F4F6;
     border-right: 1px solid var(--border);
     padding: 24px;
-    display: flex; flex-direction: column; justify-content: space-between;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between;
     flex-shrink: 0;
     transition: transform 0.3s ease;
 }
+
 .brand {
-    font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 40px;
-    display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em;
+    font-size: 1.25rem; 
+    font-weight: 800; 
+    color: var(--primary); 
+    margin-bottom: 40px;
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    letter-spacing: -0.02em;
 }
 .brand span { color: var(--accent); }
-.nav-menu { display: flex; flex-direction: column; gap: 6px; }
+
+.nav-menu { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px; 
+}
+
 .nav-item {
-    background: transparent; border: none; text-align: left; padding: 12px 16px;
-    border-radius: var(--radius); color: var(--text-light); font-weight: 500;
-    font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; gap: 12px;
+    background: transparent; 
+    border: none; 
+    text-align: left; 
+    padding: 12px 16px;
+    border-radius: var(--radius); 
+    color: var(--text-light); 
+    font-weight: 500;
+    font-size: 0.9rem; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
 }
 .nav-item:hover:not(.locked) { background: #E5E7EB; color: var(--primary); }
 .nav-item.active { background: var(--primary); color: #fff; box-shadow: var(--shadow); }
@@ -80,6 +113,7 @@ body {
     top: 0;
     z-index: 50;
 }
+
 .menu-toggle {
     background: none;
     border: none;
@@ -88,6 +122,7 @@ body {
     cursor: pointer;
     padding: 8px;
 }
+
 .mobile-overlay {
     display: none;
     position: fixed;
@@ -103,29 +138,100 @@ body {
 }
 
 .main-content {
-    flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); position: relative;
+    flex: 1; 
+    padding: 40px; 
+    overflow-y: auto; 
+    background: var(--bg); 
+    position: relative;
 }
-h2 { font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; letter-spacing: -0.02em; }
-h3 { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+h2 { 
+    font-size: 1.8rem; 
+    font-weight: 700; 
+    color: var(--primary); 
+    margin-bottom: 24px; 
+    letter-spacing: -0.02em; 
+}
+
+h3 { 
+    font-size: 1rem; 
+    font-weight: 600; 
+    color: var(--primary); 
+    margin-bottom: 16px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+}
 
 .card {
-    background: #fff; border: 1px solid var(--border); border-radius: 12px;
-    padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow);
+    background: #fff; 
+    border: 1px solid var(--border); 
+    border-radius: 12px;
+    padding: 24px; 
+    margin-bottom: 24px; 
+    box-shadow: var(--shadow);
 }
+
+.card-header-flex { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 16px; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+}
+
+.chart-select { 
+    padding: 6px 12px; 
+    border: 1px solid var(--border); 
+    border-radius: 6px; 
+    font-size: 0.85rem; 
+    color: var(--text); 
+    background: var(--bg-alt); 
+    cursor: pointer; 
+}
+
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group.full { grid-column: 1 / -1; }
+
 label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
 input, select, textarea {
-    padding: 10px; border: 1px solid var(--border); border-radius: 6px;
-    font-size: 0.9rem; transition: 0.2s; background: #fff; font-family: var(--font-main);
+    padding: 10px; 
+    border: 1px solid var(--border); 
+    border-radius: 6px;
+    font-size: 0.9rem; 
+    transition: 0.2s; 
+    background: #fff; 
+    font-family: var(--font-main);
 }
-input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(0,155,119,0.1); }
+input:focus, select:focus, textarea:focus { 
+    border-color: var(--accent); 
+    outline: none; 
+    box-shadow: 0 0 0 3px rgba(0,155,119,0.1); 
+}
 input.error, select.error { border-color: var(--danger); }
+
 .error-message {
     font-size: 0.75rem;
     color: var(--danger);
     margin-top: 4px;
+}
+
+.priority-toggle-container {
+    background: #F3F4F6;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+}
+.priority-toggle-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--primary);
 }
 
 .material-search-container {
@@ -212,8 +318,13 @@ input.error, select.error { border-color: var(--danger); }
 .material-screen { background: #F3E8FF; color: #6B21A8; }
 
 .file-upload-wrapper {
-    border: 2px dashed var(--border); border-radius: 8px; padding: 24px;
-    text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg-alt);
+    border: 2px dashed var(--border); 
+    border-radius: 8px; 
+    padding: 24px;
+    text-align: center; 
+    cursor: pointer; 
+    transition: all 0.2s; 
+    background: var(--bg-alt);
 }
 .file-upload-wrapper:hover { border-color: var(--accent); background: #F0FDF4; }
 .file-name { margin-top: 8px; font-size: 0.85rem; color: var(--accent); font-weight: 600; }
@@ -268,9 +379,17 @@ input.error, select.error { border-color: var(--danger); }
 }
 
 .btn {
-    padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;
-    border: none; cursor: pointer; transition: 0.2s; display: inline-flex;
-    align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    font-weight: 600; 
+    font-size: 0.9rem;
+    border: none; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    display: inline-flex;
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px;
 }
 .btn:active { transform: scale(0.98); }
 .btn-primary { background: var(--primary); color: #fff; }
@@ -280,6 +399,7 @@ input.error, select.error { border-color: var(--danger); }
 .btn-danger { background: var(--danger); color: #fff; }
 .btn-success { background: var(--success); color: #fff; }
 .btn-warning { background: var(--warning); color: #fff; }
+.btn-priority { background: #000; color: #fff; }
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
 
 .search-filter-section {
@@ -317,7 +437,7 @@ input.error, select.error { border-color: var(--danger); }
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-end;
 }
 .filter-group {
     display: flex;
@@ -400,6 +520,9 @@ input.error, select.error { border-color: var(--danger); }
 }
 .status-pending { background: #FFF7ED; color: #C2410C; }
 .status-assigned { background: #ECFDF5; color: #047857; }
+.status-complete { background: #374151; color: #F9FAFB; }
+.status-priority { background: #000; color: #fff; }
+
 .outsider-badge {
     display: inline-block; padding: 4px 10px; border-radius: 20px;
     font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
@@ -691,6 +814,23 @@ input.error, select.error { border-color: var(--danger); }
     border-color: var(--primary);
 }
 
+.calendar-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.reassign-section {
+    margin-top: 10px;
+    padding: 16px;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-radius: 8px;
+    display: none;
+}
+.reassign-section.show { display: block; }
+
 @media (max-width: 1024px) {
     .installer-card {
         padding: 30px 20px;
@@ -746,6 +886,7 @@ input.error, select.error { border-color: var(--danger); }
     
     .filters-row {
         flex-direction: column;
+        align-items: flex-start;
     }
     
     .filter-group {
@@ -824,6 +965,11 @@ input.error, select.error { border-color: var(--danger); }
     
     .chart-container {
         height: 250px;
+    }
+    
+    .calendar-bottom-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 }
 
@@ -905,7 +1051,7 @@ input.error, select.error { border-color: var(--danger); }
             </div>
         </div>
         <div style="font-size:0.75rem; color:var(--text-light);">
-            v3.3 - Nomadtika<br>&copy; 2026
+            v4.6 - Skill Filter<br>&copy; 2026
         </div>
     </div>
 
@@ -918,7 +1064,20 @@ input.error, select.error { border-color: var(--danger); }
             
             <div class="card">
                 <h3>New Job</h3>
+                
+                <div class="priority-toggle-container">
+                    <input type="checkbox" id="jobPriorityToggle" style="width:20px; height:20px; accent-color: #000;">
+                    <label for="jobPriorityToggle" class="priority-toggle-label">Direct Priority Assignment (Nomadtika Priority)</label>
+                </div>
+
                 <div class="form-grid">
+                    <div class="form-group" id="prioritySelectGroup" style="display:none; grid-column: 1 / -1; background:#000; padding:10px; border-radius:6px; color:#fff;">
+                        <label style="color:#fff;">Select Installer (Direct Assign)</label>
+                        <select id="priorityInstaller" style="width:100%; border:1px solid #333;">
+                            <option value="">Select an installer...</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>Client *</label>
                         <input type="text" id="jobClient" placeholder="Full name">
@@ -1065,9 +1224,15 @@ input.error, select.error { border-color: var(--danger); }
                 <div class="calendar-header">Sat</div>
             </div>
 
-            <div class="card" style="margin-top: 24px;">
-                <h3>Upcoming Jobs</h3>
-                <div id="upcomingJobs"></div>
+            <div class="calendar-bottom-grid">
+                <div class="card">
+                    <h3 style="color:var(--text-light)">Pending Jobs (To Assign)</h3>
+                    <div id="upcomingPendingJobs"></div>
+                </div>
+                <div class="card">
+                    <h3 style="color:var(--accent)">Upcoming Assigned Jobs</h3>
+                    <div id="upcomingAssignedJobs"></div>
+                </div>
             </div>
         </div>
 
@@ -1114,12 +1279,31 @@ input.error, select.error { border-color: var(--danger); }
                     <span style="color:#10B981">●</span> Personal YES &nbsp;
                     <span style="color:#009B77">●</span> Replacement YES &nbsp;
                     <span style="color:#EF4444">●</span> Personal NO &nbsp;
-                    <span style="color:#991B1B">●</span> Replacement NO
+                    <span style="color:#991B1B">●</span> Replacement NO &nbsp;
+                    <span style="color:#000000; font-weight:bold;">●</span> Nomadtika Priority
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Performance Matrix (Quality vs. Commitment)</h3>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:10px;">
+                    Eje Y: Calidad (WBQ) | Eje X: Compromiso (% Aceptación)
+                </p>
+                <div class="chart-container">
+                    <canvas id="performanceScatterChart"></canvas>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Distribution by Material Category</h3>
+                <div class="card-header-flex">
+                    <h3>Distribution by Material</h3>
+                    <select id="materialDistFilter" class="chart-select" onchange="updateCharts()">
+                        <option value="All">All Categories</option>
+                        <option value="Wall">Wall Acoustic</option>
+                        <option value="Ceiling">Ceiling Acoustic</option>
+                        <option value="Screen">Screen Acoustic</option>
+                    </select>
+                </div>
                 <div class="chart-container" style="height: 300px;">
                     <canvas id="materialCategoryChart"></canvas>
                 </div>
@@ -1140,7 +1324,34 @@ input.error, select.error { border-color: var(--danger); }
             </div>
 
             <div class="card">
-                <h3>Average WBQ Rate by Material Category</h3>
+                <div class="card-header-flex">
+                    <h3>Installer Skill Profile (Avg Score by Material)</h3>
+                    <div style="display:flex; gap:10px;">
+                        <select id="skillInstallerSelect" class="chart-select" onchange="updateSkillChart()">
+                            </select>
+                        <select id="skillCategorySelect" class="chart-select" onchange="updateSkillChart()">
+                            <option value="All">All Categories</option>
+                            <option value="Wall">Wall Acoustic</option>
+                            <option value="Ceiling">Ceiling Acoustic</option>
+                            <option value="Screen">Screen Acoustic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="skillChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-flex">
+                    <h3>Average WBQ Rate by Material</h3>
+                    <select id="materialWBQFilter" class="chart-select" onchange="updateCharts()">
+                        <option value="All">All Categories</option>
+                        <option value="Wall">Wall Acoustic</option>
+                        <option value="Ceiling">Ceiling Acoustic</option>
+                        <option value="Screen">Screen Acoustic</option>
+                    </select>
+                </div>
                 <div class="chart-container" style="height: 300px;">
                     <canvas id="wbqMaterialChart"></canvas>
                 </div>
@@ -1168,10 +1379,24 @@ input.error, select.error { border-color: var(--danger); }
             <button onclick="closeModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding: 4px 8px;">&times;</button>
         </div>
         <div class="edit-mode-toggle">
+            <button class="btn btn-danger btn-sm" id="btnEmergency" style="display:none;">🚨 Emergency Reassign</button>
             <button class="btn btn-outline btn-sm" id="btnEditMode">✏️ Edit</button>
             <button class="btn btn-success btn-sm" id="btnSaveEdit" style="display:none;">💾 Save Changes</button>
             <button class="btn btn-outline btn-sm" id="btnCancelEdit" style="display:none;">✕ Cancel</button>
         </div>
+        
+        <div id="emergencySection" class="reassign-section">
+            <h4 style="color:#991B1B; margin-bottom:10px;">🚨 Emergency Reassign (Priority Protocol)</h4>
+            <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">This will penalize the current installer and assign the job to the new selected person as a PRIORITY job.</p>
+            <div style="display:flex; gap:10px;">
+                <select id="emergencySelect" style="flex:1; padding:8px;">
+                    <option value="">Select replacement...</option>
+                </select>
+                <button class="btn btn-danger btn-sm" onclick="confirmEmergencyReassign()">Confirm Reassign</button>
+                <button class="btn btn-outline btn-sm" onclick="toggleEmergencySection()">Cancel</button>
+            </div>
+        </div>
+
         <div id="modalContent"></div>
         <div style="margin-top:24px; text-align:right;">
             <button class="btn btn-primary" onclick="closeModal()">Close</button>
@@ -1230,6 +1455,25 @@ const INSTALLERS = [
   {id:6,name:'Kyle',priority:'P6'}
 ];
 
+const INSTALLER_COLORS = {
+    'Daniel': '#3B82F6',   // Azul
+    'Jimmy': '#EF4444',    // Rojo
+    'Cristian': '#10B981', // Verde
+    'Bob': '#F59E0B',      // Naranja
+    'Kafw': '#8B5CF6',     // Violeta
+    'Kyle': '#EC4899',     // Rosa
+    'Pending': '#9CA3AF',  // Gris (Sin asignar)
+    'Default': '#6366F1'   // Indigo (Outsiders/Otros)
+};
+
+function populateInstallerDropdowns() {
+    const opts = INSTALLERS.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
+    document.getElementById('priorityInstaller').innerHTML = '<option value="">Select an installer...</option>' + opts;
+    document.getElementById('emergencySelect').innerHTML = '<option value="">Select replacement...</option>' + opts;
+    // POPULATE SKILL FILTER
+    document.getElementById('skillInstallerSelect').innerHTML = opts;
+}
+
 let rCounter = 0;
 let state = {
     currentWork: 1,
@@ -1257,6 +1501,19 @@ let selectedMaterialType = '';
 let editFileAction = null;
 let editNewFile = null;
 let wbqTrendPeriod = 'weekly';
+
+// PRIORITY TOGGLE LOGIC
+const priorityToggle = document.getElementById('jobPriorityToggle');
+const priorityGroup = document.getElementById('prioritySelectGroup');
+
+priorityToggle.addEventListener('change', (e) => {
+    if(e.target.checked) {
+        priorityGroup.style.display = 'block';
+    } else {
+        priorityGroup.style.display = 'none';
+        document.getElementById('priorityInstaller').value = '';
+    }
+});
 
 function renderMaterialDropdown(searchTerm = '') {
     const dropdown = document.getElementById('materialDropdown');
@@ -1346,6 +1603,7 @@ document.addEventListener('click', (e) => {
 });
 
 renderMaterialDropdown();
+populateInstallerDropdowns(); 
 
 function toggleMobileMenu() {
     const sidebar = document.getElementById('sidebar');
@@ -1384,6 +1642,7 @@ function switchTab(tabId) {
         updateStats();
         renderFilters();
         updateCharts();
+        updateSkillChart(); // Init New Chart
     }
 }
 
@@ -1410,6 +1669,9 @@ function validateJobForm() {
     const material = document.getElementById('selectedMaterial').value;
     const date = document.getElementById('jobDate').value;
     
+    if(priorityToggle.checked) {
+        if(!document.getElementById('priorityInstaller').value) return false;
+    }
     return client && address && material && date;
 }
 
@@ -1425,60 +1687,40 @@ function validateWBQRate(rate) {
 }
 
 function showDateError() {
-    const errorEl = document.getElementById('endDateError');
-    const endDateInput = document.getElementById('jobEndDate');
-    errorEl.style.display = 'block';
-    endDateInput.classList.add('error');
+    document.getElementById('endDateError').style.display = 'block';
+    document.getElementById('jobEndDate').classList.add('error');
 }
 
 function hideDateError() {
-    const errorEl = document.getElementById('endDateError');
-    const endDateInput = document.getElementById('jobEndDate');
-    errorEl.style.display = 'none';
-    endDateInput.classList.remove('error');
+    document.getElementById('endDateError').style.display = 'none';
+    document.getElementById('jobEndDate').classList.remove('error');
 }
 
 function showWBQError() {
-    const errorEl = document.getElementById('wbqError');
-    const wbqInput = document.getElementById('jobWBQRate');
-    errorEl.style.display = 'block';
-    wbqInput.classList.add('error');
+    document.getElementById('wbqError').style.display = 'block';
+    document.getElementById('jobWBQRate').classList.add('error');
 }
 
 function hideWBQError() {
-    const errorEl = document.getElementById('wbqError');
-    const wbqInput = document.getElementById('jobWBQRate');
-    errorEl.style.display = 'none';
-    wbqInput.classList.remove('error');
+    document.getElementById('wbqError').style.display = 'none';
+    document.getElementById('jobWBQRate').classList.remove('error');
 }
 
 document.getElementById('jobDate').addEventListener('change', () => {
     const startDate = document.getElementById('jobDate').value;
     const endDate = document.getElementById('jobEndDate').value;
-    if(validateDateRange(startDate, endDate)) {
-        hideDateError();
-    } else {
-        showDateError();
-    }
+    if(validateDateRange(startDate, endDate)) hideDateError(); else showDateError();
 });
 
 document.getElementById('jobEndDate').addEventListener('change', () => {
     const startDate = document.getElementById('jobDate').value;
     const endDate = document.getElementById('jobEndDate').value;
-    if(validateDateRange(startDate, endDate)) {
-        hideDateError();
-    } else {
-        showDateError();
-    }
+    if(validateDateRange(startDate, endDate)) hideDateError(); else showDateError();
 });
 
 document.getElementById('jobWBQRate').addEventListener('input', (e) => {
     const value = e.target.value;
-    if(validateWBQRate(value)) {
-        hideWBQError();
-    } else {
-        showWBQError();
-    }
+    if(validateWBQRate(value)) hideWBQError(); else showWBQError();
 });
 
 function getById(id){ return state.tracking.find(i=>i.id===id) }
@@ -1617,7 +1859,7 @@ document.getElementById('btnSaveJob').addEventListener('click', ()=>{
         if(!document.getElementById('selectedMaterial').value) {
             showMaterialError();
         }
-        showToast("⚠️ Please complete required fields: Client, Address, Material Type, and Start Date");
+        showToast("⚠️ Please complete required fields");
         return;
     }
 
@@ -1641,6 +1883,8 @@ document.getElementById('btnSaveJob').addEventListener('click', ()=>{
     const addr = document.getElementById('jobAddress').value.trim();
     const outsider = document.getElementById('jobOutsider').value.trim();
     const materialType = document.getElementById('selectedMaterial').value;
+    const isPriority = priorityToggle.checked;
+    const priorityAssignee = document.getElementById('priorityInstaller').value;
 
     let fileUrl = null;
     let fileName = null;
@@ -1661,15 +1905,31 @@ document.getElementById('btnSaveJob').addEventListener('click', ()=>{
         notes: document.getElementById('jobNotes').value,
         fileName: fileName,
         fileUrl: fileUrl,
-        status: 'Pending', 
-        assignedTo: null,
+        status: isPriority ? 'Assigned' : 'Pending', 
+        assignedTo: isPriority ? priorityAssignee : null,
+        isPriority: isPriority,
         rotationHistory: []
     };
+
+    if(isPriority) {
+        const insObj = INSTALLERS.find(i => i.name === priorityAssignee);
+        if(insObj) {
+            state.history.push({
+                work: state.currentWork,
+                installerId: insObj.id,
+                installerName: insObj.name,
+                response: 'YES',
+                type: 'PRIORITY',
+                notes: 'Direct Assignment (Nomadtika Priority)',
+                jobId: newJob.id
+            });
+        }
+    }
 
     state.jobs.push(newJob);
     renderJobs();
     document.getElementById('btnClearJob').click();
-    showToast("✅ Job Saved");
+    showToast(isPriority ? "✅ Priority Job Assigned" : "✅ Job Saved");
 });
 
 document.getElementById('btnClearJob').addEventListener('click', ()=>{
@@ -1682,6 +1942,9 @@ document.getElementById('btnClearJob').addEventListener('click', ()=>{
     document.getElementById('materialSearch').value = '';
     document.getElementById('selectedMaterial').value = '';
     document.getElementById('fileName').textContent = '';
+    document.getElementById('priorityInstaller').value = '';
+    priorityToggle.checked = false;
+    priorityGroup.style.display = 'none';
     selectedMaterialType = '';
     hideDateError();
     hideMaterialError();
@@ -1689,9 +1952,14 @@ document.getElementById('btnClearJob').addEventListener('click', ()=>{
     pendingFile = null;
 });
 
+document.getElementById('searchInput').addEventListener('input', (e) => { filterState.searchQuery = e.target.value; renderJobs(); });
+document.getElementById('filterStatus').addEventListener('change', (e) => { filterState.status = e.target.value; renderJobs(); });
+document.getElementById('filterMaterialCategory').addEventListener('change', (e) => { filterState.materialCategory = e.target.value; renderJobs(); });
+document.getElementById('filterDateFrom').addEventListener('change', (e) => { filterState.dateFrom = e.target.value; renderJobs(); });
+document.getElementById('filterDateTo').addEventListener('change', (e) => { filterState.dateTo = e.target.value; renderJobs(); });
+
 function getFilteredJobs() {
     let filtered = [...state.jobs];
-    
     if (filterState.searchQuery) {
         const query = filterState.searchQuery.toLowerCase();
         filtered = filtered.filter(job => 
@@ -1701,25 +1969,10 @@ function getFilteredJobs() {
             (job.materialType && job.materialType.toLowerCase().includes(query))
         );
     }
-    
-    if (filterState.status) {
-        filtered = filtered.filter(job => job.status === filterState.status);
-    }
-    
-    if (filterState.materialCategory) {
-        filtered = filtered.filter(job => 
-            job.materialType && getMaterialCategory(job.materialType) === filterState.materialCategory
-        );
-    }
-    
-    if (filterState.dateFrom) {
-        filtered = filtered.filter(job => job.date && job.date >= filterState.dateFrom);
-    }
-    
-    if (filterState.dateTo) {
-        filtered = filtered.filter(job => job.date && job.date <= filterState.dateTo);
-    }
-    
+    if (filterState.status) filtered = filtered.filter(job => job.status === filterState.status);
+    if (filterState.materialCategory) filtered = filtered.filter(job => job.materialType && getMaterialCategory(job.materialType) === filterState.materialCategory);
+    if (filterState.dateFrom) filtered = filtered.filter(job => job.date && job.date >= filterState.dateFrom);
+    if (filterState.dateTo) filtered = filtered.filter(job => job.date && job.date <= filterState.dateTo);
     return filtered;
 }
 
@@ -1727,46 +1980,13 @@ function updateResultsCount(count) {
     document.getElementById('resultsCount').textContent = `Showing ${count} job${count !== 1 ? 's' : ''}`;
 }
 
-document.getElementById('searchInput').addEventListener('input', (e) => {
-    filterState.searchQuery = e.target.value;
-    renderJobs();
-});
-
-document.getElementById('filterStatus').addEventListener('change', (e) => {
-    filterState.status = e.target.value;
-    renderJobs();
-});
-
-document.getElementById('filterMaterialCategory').addEventListener('change', (e) => {
-    filterState.materialCategory = e.target.value;
-    renderJobs();
-});
-
-document.getElementById('filterDateFrom').addEventListener('change', (e) => {
-    filterState.dateFrom = e.target.value;
-    renderJobs();
-});
-
-document.getElementById('filterDateTo').addEventListener('change', (e) => {
-    filterState.dateTo = e.target.value;
-    renderJobs();
-});
-
 document.getElementById('btnClearFilters').addEventListener('click', () => {
-    filterState = {
-        searchQuery: '',
-        status: '',
-        materialCategory: '',
-        dateFrom: '',
-        dateTo: ''
-    };
-    
+    filterState = { searchQuery: '', status: '', materialCategory: '', dateFrom: '', dateTo: '' };
     document.getElementById('searchInput').value = '';
     document.getElementById('filterStatus').value = '';
     document.getElementById('filterMaterialCategory').value = '';
     document.getElementById('filterDateFrom').value = '';
     document.getElementById('filterDateTo').value = '';
-    
     renderJobs();
     showToast('🔄 Filters cleared');
 });
@@ -1774,26 +1994,15 @@ document.getElementById('btnClearFilters').addEventListener('click', () => {
 function renderJobs() {
     const list = document.getElementById('jobsList');
     const filteredJobs = getFilteredJobs();
+    const today = new Date().toISOString().split('T')[0];
     
     updateResultsCount(filteredJobs.length);
     
     if(!filteredJobs.length) {
         if(state.jobs.length === 0) {
-            list.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
-                    <div class="empty-state-text">No jobs registered</div>
-                    <div class="empty-state-subtext">Start by creating a new job above</div>
-                </div>
-            `;
+            list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No jobs registered</div><div class="empty-state-subtext">Start by creating a new job above</div></div>';
         } else {
-            list.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🔍</div>
-                    <div class="empty-state-text">No results found</div>
-                    <div class="empty-state-subtext">Try adjusting your search filters</div>
-                </div>
-            `;
+            list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-text">No results found</div><div class="empty-state-subtext">Try adjusting your search filters</div></div>';
         }
         return;
     }
@@ -1801,6 +2010,7 @@ function renderJobs() {
     list.innerHTML = filteredJobs.slice().reverse().map(job => {
         const materialCategory = getMaterialCategory(job.materialType);
         const badgeClass = getMaterialBadgeClass(materialCategory);
+        const isComplete = (job.endDate && job.endDate < today) || (!job.endDate && job.date < today);
         
         return `
         <div class="job-item">
@@ -1811,21 +2021,15 @@ function renderJobs() {
                 </div>
                 <div style="margin-top: 4px;">
                     <span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span>
+                    ${isComplete ? '<span class="job-status status-complete">COMPLETED</span>' : ''}
+                    ${job.isPriority ? '<span class="job-status status-priority">PRIORITY</span>' : ''}
                     ${job.materialType ? `<span class="material-badge ${badgeClass}">${job.materialType}</span>` : ''}
                     ${job.outsider ? '<span class="outsider-badge">HELPER: ' + job.outsider + '</span>' : ''}
                 </div>
-                ${job.assignedTo ? `
-                <div class="assigned-worker">
-                    👤 Assigned to: ${job.assignedTo}${job.outsider ? ' + ' + job.outsider : ''}
-                    ${job.wbqRate ? ` • ⭐ ${job.wbqRate}/10` : ''}
-                </div>
-                ` : ''}
+                ${job.assignedTo ? `<div class="assigned-worker">👤 Assigned to: ${job.assignedTo}${job.outsider ? ' + ' + job.outsider : ''}${job.wbqRate ? ` • ⭐ ${job.wbqRate}/10` : ''}</div>` : ''}
             </div>
             <div class="job-item-actions">
-                 ${job.status === 'Pending' 
-                    ? `<button class="btn btn-primary btn-sm" onclick="startRotation(${job.id})">→ Assign</button>` 
-                    : `<button class="btn btn-outline btn-sm" onclick="viewDetails(${job.id})">📋 Details</button>`
-                }
+                 ${job.status === 'Pending' ? `<button class="btn btn-primary btn-sm" onclick="startRotation(${job.id})">→ Assign</button>` : `<button class="btn btn-outline btn-sm" onclick="viewDetails(${job.id})">📋 Details</button>`}
             </div>
         </div>
     `}).join('');
@@ -1843,207 +2047,106 @@ window.viewDetails = function(id) {
     editMode = false;
     editFileAction = null;
     editNewFile = null;
+    document.getElementById('emergencySection').classList.remove('show');
     renderJobDetails(id);
     document.getElementById('detailModal').style.display = 'flex';
 }
+
+window.toggleEmergencySection = function() {
+    document.getElementById('emergencySection').classList.toggle('show');
+}
+
+window.confirmEmergencyReassign = function() {
+    const newInstallerName = document.getElementById('emergencySelect').value;
+    if(!newInstallerName) { showToast("⚠️ Select a replacement installer"); return; }
+    
+    const job = state.jobs.find(j => j.id === currentEditingJobId);
+    const prevHistory = state.history.find(h => h.jobId === currentEditingJobId && h.response === 'YES' && h.installerName === job.assignedTo);
+    
+    if(prevHistory) {
+        prevHistory.response = 'NO';
+        prevHistory.notes += ' (Failed to attend - Emergency Reassign)';
+        if (prevHistory.type === 'NORMAL') {
+            const match = prevHistory.notes.match(/R(\d+)/);
+            if (match) {
+                const tokenToRemove = parseInt(match[1]);
+                const prevInstaller = state.tracking.find(i => i.id === prevHistory.installerId);
+                if (prevInstaller) {
+                    const tokenIndex = prevInstaller.replacements.indexOf(tokenToRemove);
+                    if (tokenIndex > -1) {
+                        prevInstaller.replacements.splice(tokenIndex, 1);
+                        showToast(`🚫 Token R${tokenToRemove} removed from ${prevInstaller.name}`);
+                    }
+                }
+            }
+        }
+    }
+    
+    const newInsObj = INSTALLERS.find(i => i.name === newInstallerName);
+    if(newInsObj) {
+        state.history.push({
+            work: state.currentWork, installerId: newInsObj.id, installerName: newInsObj.name,
+            response: 'YES', type: 'PRIORITY', notes: `Emergency Cover for ${job.assignedTo}`, jobId: job.id
+        });
+    }
+    
+    job.assignedTo = newInstallerName;
+    job.isPriority = true;
+    
+    toggleEmergencySection();
+    closeModal();
+    renderJobs();
+    updateStats();
+    showToast(`🚨 Job reassigned to ${newInstallerName} (Priority)`);
+}
+
+document.getElementById('btnEmergency').addEventListener('click', toggleEmergencySection);
 
 function renderJobDetails(id) {
     const job = state.jobs.find(j => j.id === id);
     if(!job) return;
     
     const jobHistory = state.history.filter(h => h.jobId === id);
-    
     document.getElementById('btnEditMode').style.display = editMode ? 'none' : 'inline-flex';
     document.getElementById('btnSaveEdit').style.display = editMode ? 'inline-flex' : 'none';
     document.getElementById('btnCancelEdit').style.display = editMode ? 'inline-flex' : 'none';
+    document.getElementById('btnEmergency').style.display = (job.status === 'Assigned' && !editMode) ? 'inline-flex' : 'none';
     
     const materialCategory = getMaterialCategory(job.materialType);
     const badgeClass = getMaterialBadgeClass(materialCategory);
     
     let fileHtml = '';
+    // (Existing file rendering logic omitted for brevity, reusing previous implementation)
     if (editMode) {
         if (job.fileUrl && job.fileName && editFileAction !== 'remove') {
-            fileHtml = `
-            <div class="detail-row full">
-                <div class="detail-label">Attached File</div>
-                <div class="file-edit-container">
-                    <div class="file-current">
-                        <span class="file-current-name">📄 ${job.fileName}</span>
-                        <div class="file-current-actions">
-                            <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
-                            <button class="btn btn-danger btn-sm" onclick="removeEditFile()">🗑️ Remove</button>
-                        </div>
-                    </div>
-                    ${editNewFile ? `
-                    <div style="padding:8px 12px; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:6px; color:#047857; font-size:0.85rem;">
-                        ✓ New file will replace current: ${editNewFile.name}
-                    </div>
-                    ` : `
-                    <div class="file-upload-edit" id="editFileUpload">
-                        <input type="file" id="editFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
-                        <span>Click to replace with new file</span>
-                    </div>
-                    `}
-                </div>
-            </div>`;
+            fileHtml = `<div class="detail-row full"><div class="detail-label">Attached File</div><div class="file-edit-container"><div class="file-current"><span class="file-current-name">📄 ${job.fileName}</span><div class="file-current-actions"><a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a><button class="btn btn-danger btn-sm" onclick="removeEditFile()">🗑️ Remove</button></div></div>${editNewFile ? `<div style="padding:8px 12px; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:6px; color:#047857; font-size:0.85rem;">✓ New file will replace current: ${editNewFile.name}</div>` : `<div class="file-upload-edit" id="editFileUpload"><input type="file" id="editFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif"><span>Click to replace with new file</span></div>`}</div></div>`;
         } else if (editFileAction === 'remove') {
-            fileHtml = `
-            <div class="detail-row full">
-                <div class="detail-label">Attached File</div>
-                <div class="file-edit-container">
-                    <div class="file-removed-indicator">
-                        🗑️ File will be removed when you save changes
-                    </div>
-                    <button class="btn btn-outline btn-sm" onclick="undoRemoveFile()" style="width:100%;">↶ Undo Remove</button>
-                </div>
-            </div>`;
+            fileHtml = `<div class="detail-row full"><div class="detail-label">Attached File</div><div class="file-edit-container"><div class="file-removed-indicator">🗑️ File will be removed when you save changes</div><button class="btn btn-outline btn-sm" onclick="undoRemoveFile()" style="width:100%;">↶ Undo Remove</button></div></div>`;
         } else {
-            fileHtml = `
-            <div class="detail-row full">
-                <div class="detail-label">Attached File</div>
-                ${editNewFile ? `
-                <div style="padding:8px 12px; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:6px; color:#047857; font-size:0.85rem;">
-                    ✓ New file selected: ${editNewFile.name}
-                </div>
-                ` : `
-                <div class="file-upload-edit" id="editFileUpload">
-                    <input type="file" id="editFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif">
-                    <span>Click to attach file</span>
-                </div>
-                `}
-            </div>`;
+            fileHtml = `<div class="detail-row full"><div class="detail-label">Attached File</div>${editNewFile ? `<div style="padding:8px 12px; background:#ECFDF5; border:1px solid #BBF7D0; border-radius:6px; color:#047857; font-size:0.85rem;">✓ New file selected: ${editNewFile.name}</div>` : `<div class="file-upload-edit" id="editFileUpload"><input type="file" id="editFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif"><span>Click to attach file</span></div>`}</div>`;
         }
     } else {
         if(job.fileUrl && job.fileName) {
-            fileHtml = `
-            <div class="detail-row full" style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0;">
-                <div class="detail-label" style="margin-bottom:8px;">Attached File</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
-                    <span style="font-weight:600; font-size:0.9rem;">📄 ${job.fileName}</span>
-                    <a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a>
-                </div>
-            </div>`;
+            fileHtml = `<div class="detail-row full" style="background:#F0FDF4; padding:12px; border-radius:8px; border:1px solid #BBF7D0;"><div class="detail-label" style="margin-bottom:8px;">Attached File</div><div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;"><span style="font-weight:600; font-size:0.9rem;">📄 ${job.fileName}</span><a href="${job.fileUrl}" download="${job.fileName}" class="btn btn-success btn-sm" style="text-decoration:none;">⬇ Download</a></div></div>`;
         } else {
             fileHtml = `<div class="detail-row full"><div class="detail-label">File</div><div class="detail-content" style="color:#999;">No attachment</div></div>`;
         }
     }
 
-    let historyHtml = '';
-    if(jobHistory.length > 0) {
-        historyHtml = `
-        <div class="detail-row full">
-            <div class="detail-label">Rotation History</div>
-            <div class="timeline-container">
-                ${jobHistory.map(h => `
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div style="position:relative; width:100%;">
-                            ${jobHistory.indexOf(h) < jobHistory.length - 1 ? '<div class="timeline-line"></div>' : ''}
-                            <div class="timeline-content">
-                                <div class="timeline-header">
-                                    <div class="timeline-installer">${h.installerName}</div>
-                                    <span class="timeline-response ${h.response === 'YES' ? 'response-yes' : 'response-no'}">
-                                        ${h.response === 'YES' ? '✓ ACCEPTED' : '✗ REJECTED'}
-                                    </span>
-                                </div>
-                                <div style="font-size:0.85rem; color:var(--text-light);">${h.notes}</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>`;
-    }
-
     const html = `
-        <div class="detail-row">
-            <div class="detail-field">
-                <div class="detail-label">Client</div>
-                ${editMode 
-                    ? `<input type="text" class="detail-input" id="edit-client" value="${job.client}">` 
-                    : `<div class="detail-content">${job.client}</div>`
-                }
-            </div>
-            <div class="detail-field">
-                <div class="detail-label">Address</div>
-                ${editMode 
-                    ? `<input type="text" class="detail-input" id="edit-address" value="${job.address}">` 
-                    : `<div class="detail-content">${job.address}</div>`
-                }
-            </div>
-        </div>
-        <div class="detail-row full">
-            <div class="detail-field">
-                <div class="detail-label">Material Type</div>
-                ${editMode ? `
-                    <div class="material-search-container">
-                        <input type="text" id="editMaterialSearch" class="material-search-input" placeholder="Search material..." autocomplete="off" value="${job.materialType}">
-                        <span class="material-search-icon">🔍</span>
-                        <div class="material-dropdown" id="editMaterialDropdown"></div>
-                    </div>
-                    <input type="hidden" id="editSelectedMaterial" value="${job.materialType}">
-                ` : `
-                    <div class="detail-content">
-                        <span class="material-badge ${badgeClass}">${job.materialType}</span>
-                    </div>
-                `}
-            </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-field">
-                <div class="detail-label">Start Date</div>
-                ${editMode 
-                    ? `<input type="date" class="detail-input" id="edit-date" value="${job.date}">` 
-                    : `<div class="detail-content">${job.date || '-'}</div>`
-                }
-            </div>
-            <div class="detail-field">
-                <div class="detail-label">End Date</div>
-                ${editMode 
-                    ? `<input type="date" class="detail-input" id="edit-enddate" value="${job.endDate||''}">` 
-                    : `<div class="detail-content">${job.endDate || '-'}</div>`
-                }
-            </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-field">
-                <div class="detail-label">Helper / Assistant</div>
-                ${editMode 
-                    ? `<input type="text" class="detail-input" id="edit-outsider" value="${job.outsider||''}" placeholder="Helper name">` 
-                    : `<div class="detail-content">${job.outsider ? '👤 ' + job.outsider : '-'}</div>`
-                }
-            </div>
-            <div class="detail-field">
-                <div class="detail-label">WBQ Rate (1-10)</div>
-                ${editMode 
-                    ? `<input type="number" class="detail-input" id="edit-wbqrate" min="1" max="10" step="1" value="${job.wbqRate||''}" placeholder="1-10">` 
-                    : `<div class="detail-content">${job.wbqRate ? '⭐ ' + job.wbqRate + '/10' : '-'}</div>`
-                }
-            </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-field">
-                <div class="detail-label">Assigned To</div>
-                <div class="detail-content" style="color:var(--accent); font-weight:700;">${job.assignedTo || '-'}</div>
-            </div>
-            <div class="detail-field">
-                <div class="detail-label">Status</div>
-                <div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div>
-            </div>
-        </div>
+        <div class="detail-row"><div class="detail-field"><div class="detail-label">Client</div>${editMode ? `<input type="text" class="detail-input" id="edit-client" value="${job.client}">` : `<div class="detail-content">${job.client}</div>`}</div><div class="detail-field"><div class="detail-label">Address</div>${editMode ? `<input type="text" class="detail-input" id="edit-address" value="${job.address}">` : `<div class="detail-content">${job.address}</div>`}</div></div>
+        <div class="detail-row full"><div class="detail-field"><div class="detail-label">Material Type</div>${editMode ? `<div class="material-search-container"><input type="text" id="editMaterialSearch" class="material-search-input" placeholder="Search material..." autocomplete="off" value="${job.materialType}"><span class="material-search-icon">🔍</span><div class="material-dropdown" id="editMaterialDropdown"></div></div><input type="hidden" id="editSelectedMaterial" value="${job.materialType}">` : `<div class="detail-content"><span class="material-badge ${badgeClass}">${job.materialType}</span></div>`}</div></div>
+        <div class="detail-row"><div class="detail-field"><div class="detail-label">Start Date</div>${editMode ? `<input type="date" class="detail-input" id="edit-date" value="${job.date}">` : `<div class="detail-content">${job.date || '-'}</div>`}</div><div class="detail-field"><div class="detail-label">End Date</div>${editMode ? `<input type="date" class="detail-input" id="edit-enddate" value="${job.endDate||''}">` : `<div class="detail-content">${job.endDate || '-'}</div>`}</div></div>
+        <div class="detail-row"><div class="detail-field"><div class="detail-label">Helper / Assistant</div>${editMode ? `<input type="text" class="detail-input" id="edit-outsider" value="${job.outsider||''}" placeholder="Helper name">` : `<div class="detail-content">${job.outsider ? '👤 ' + job.outsider : '-'}</div>`}</div><div class="detail-field"><div class="detail-label">WBQ Rate (1-10)</div>${editMode ? `<input type="number" class="detail-input" id="edit-wbqrate" min="1" max="10" step="1" value="${job.wbqRate||''}" placeholder="1-10">` : `<div class="detail-content">${job.wbqRate ? '⭐ ' + job.wbqRate + '/10' : '-'}</div>`}</div></div>
+        <div class="detail-row"><div class="detail-field"><div class="detail-label">Assigned To</div><div class="detail-content" style="color:var(--accent); font-weight:700;">${job.assignedTo || '-'} ${job.isPriority ? '<span class="job-status status-priority" style="margin-left:8px; font-size:0.7rem;">PRIORITY</span>' : ''}</div></div><div class="detail-field"><div class="detail-label">Status</div><div class="detail-content"><span class="job-status ${job.status==='Pending'?'status-pending':'status-assigned'}">${job.status}</span></div></div></div>
         ${fileHtml}
-        <div class="detail-row full">
-            <div class="detail-label">Notes</div>
-            ${editMode 
-                ? `<textarea class="detail-input" id="edit-notes" rows="3" style="resize: vertical;">${job.notes||''}</textarea>` 
-                : `<div class="detail-content" style="font-size:0.9rem;">${job.notes || '-'}</div>`
-            }
-        </div>
-        ${historyHtml}
+        <div class="detail-row full"><div class="detail-label">Notes</div>${editMode ? `<textarea class="detail-input" id="edit-notes" rows="3" style="resize: vertical;">${job.notes||''}</textarea>` : `<div class="detail-content" style="font-size:0.9rem;">${job.notes || '-'}</div>`}</div>
+        ${jobHistory.length > 0 ? `<div class="detail-row full"><div class="detail-label">Rotation History</div><div class="timeline-container">${jobHistory.map(h => `<div class="timeline-item"><div class="timeline-dot"></div><div style="position:relative; width:100%;">${jobHistory.indexOf(h) < jobHistory.length - 1 ? '<div class="timeline-line"></div>' : ''}<div class="timeline-content"><div class="timeline-header"><div class="timeline-installer">${h.installerName}</div><span class="timeline-response ${h.response === 'YES' ? 'response-yes' : 'response-no'}">${h.response === 'YES' ? '✓ ACCEPTED' : '✗ REJECTED'}</span></div><div style="font-size:0.85rem; color:var(--text-light);">${h.type === 'PRIORITY' ? '<strong>[PRIORITY]</strong> ' : ''}${h.notes}</div></div></div></div>`).join('')}</div></div>` : ''}
     `;
     document.getElementById('modalContent').innerHTML = html;
     
     if (editMode) {
+        // ... (Edit mode event listeners logic remains same as before, simplified for length limit) ...
         const editFileUpload = document.getElementById('editFileUpload');
         const editFileInput = document.getElementById('editFile');
         if (editFileUpload && editFileInput) {
@@ -2056,42 +2159,25 @@ function renderJobDetails(id) {
                 }
             });
         }
-        
         let editSelectedMaterial = job.materialType;
-        
         const editMaterialSearch = document.getElementById('editMaterialSearch');
         const editMaterialDropdown = document.getElementById('editMaterialDropdown');
-        
         function renderEditMaterialDropdown(searchTerm = '') {
             const term = searchTerm.toLowerCase();
             let html = '';
-            
             Object.keys(MATERIALS).forEach(category => {
-                const filteredMaterials = MATERIALS[category].filter(m => 
-                    m.toLowerCase().includes(term)
-                );
-                
+                const filteredMaterials = MATERIALS[category].filter(m => m.toLowerCase().includes(term));
                 if (filteredMaterials.length > 0) {
                     html += `<div class="material-category">${category} Acoustic</div>`;
                     filteredMaterials.forEach(material => {
                         const fullName = `${category} - ${material}`;
                         const isSelected = editSelectedMaterial === fullName;
-                        html += `
-                            <div class="material-option ${isSelected ? 'selected' : ''}" 
-                                 data-material="${fullName}">
-                                ${material}
-                            </div>
-                        `;
+                        html += `<div class="material-option ${isSelected ? 'selected' : ''}" data-material="${fullName}">${material}</div>`;
                     });
                 }
             });
-            
-            if (html === '') {
-                html = '<div style="padding:12px; text-align:center; color:var(--text-light);">No materials found</div>';
-            }
-            
+            if (html === '') html = '<div style="padding:12px; text-align:center; color:var(--text-light);">No materials found</div>';
             editMaterialDropdown.innerHTML = html;
-            
             editMaterialDropdown.querySelectorAll('.material-option').forEach(option => {
                 option.addEventListener('click', () => {
                     const materialName = option.getAttribute('data-material');
@@ -2102,7 +2188,6 @@ function renderJobDetails(id) {
                 });
             });
         }
-        
         editMaterialSearch.addEventListener('input', (e) => {
             const value = e.target.value;
             editSelectedMaterial = '';
@@ -2110,59 +2195,27 @@ function renderJobDetails(id) {
             renderEditMaterialDropdown(value);
             editMaterialDropdown.classList.add('show');
         });
-        
         editMaterialSearch.addEventListener('focus', () => {
             renderEditMaterialDropdown(editMaterialSearch.value);
             editMaterialDropdown.classList.add('show');
         });
-        
         renderEditMaterialDropdown();
     }
 }
 
-window.removeEditFile = function() {
-    editFileAction = 'remove';
-    editNewFile = null;
-    renderJobDetails(currentEditingJobId);
-}
-
-window.undoRemoveFile = function() {
-    editFileAction = null;
-    editNewFile = null;
-    renderJobDetails(currentEditingJobId);
-}
-
-document.getElementById('btnEditMode').addEventListener('click', () => {
-    editMode = true;
-    editFileAction = null;
-    editNewFile = null;
-    renderJobDetails(currentEditingJobId);
-});
-
-document.getElementById('btnCancelEdit').addEventListener('click', () => {
-    editMode = false;
-    editFileAction = null;
-    editNewFile = null;
-    renderJobDetails(currentEditingJobId);
-});
+window.removeEditFile = function() { editFileAction = 'remove'; editNewFile = null; renderJobDetails(currentEditingJobId); }
+window.undoRemoveFile = function() { editFileAction = null; editNewFile = null; renderJobDetails(currentEditingJobId); }
+document.getElementById('btnEditMode').addEventListener('click', () => { editMode = true; editFileAction = null; editNewFile = null; renderJobDetails(currentEditingJobId); });
+document.getElementById('btnCancelEdit').addEventListener('click', () => { editMode = false; editFileAction = null; editNewFile = null; document.getElementById('emergencySection').classList.remove('show'); renderJobDetails(currentEditingJobId); });
 
 document.getElementById('btnSaveEdit').addEventListener('click', () => {
     const job = state.jobs.find(j => j.id === currentEditingJobId);
     if(!job) return;
-    
     const newStartDate = document.getElementById('edit-date').value;
     const newEndDate = document.getElementById('edit-enddate').value;
-    
-    if(!validateDateRange(newStartDate, newEndDate)) {
-        showToast("⚠️ End date cannot be before start date");
-        return;
-    }
-    
+    if(!validateDateRange(newStartDate, newEndDate)) { showToast("⚠️ End date cannot be before start date"); return; }
     const newWBQRate = document.getElementById('edit-wbqrate').value;
-    if(!validateWBQRate(newWBQRate)) {
-        showToast("⚠️ WBQ Rate must be between 1 and 10");
-        return;
-    }
+    if(!validateWBQRate(newWBQRate)) { showToast("⚠️ WBQ Rate must be between 1 and 10"); return; }
     
     job.client = document.getElementById('edit-client').value.trim();
     job.address = document.getElementById('edit-address').value.trim();
@@ -2173,17 +2226,10 @@ document.getElementById('btnSaveEdit').addEventListener('click', () => {
     job.wbqRate = newWBQRate ? parseInt(newWBQRate) : null;
     job.notes = document.getElementById('edit-notes').value;
     
-    if (editFileAction === 'remove') {
-        job.fileName = null;
-        job.fileUrl = null;
-    } else if (editNewFile) {
-        job.fileUrl = URL.createObjectURL(editNewFile);
-        job.fileName = editNewFile.name;
-    }
+    if (editFileAction === 'remove') { job.fileName = null; job.fileUrl = null; } 
+    else if (editNewFile) { job.fileUrl = URL.createObjectURL(editNewFile); job.fileName = editNewFile.name; }
     
     editMode = false;
-    editFileAction = null;
-    editNewFile = null;
     renderJobDetails(currentEditingJobId);
     renderJobs();
     showToast("✅ Changes saved");
@@ -2191,112 +2237,71 @@ document.getElementById('btnSaveEdit').addEventListener('click', () => {
 
 window.closeModal = function() { 
     document.getElementById('detailModal').style.display = 'none';
-    editMode = false;
-    editFileAction = null;
-    editNewFile = null;
-    currentEditingJobId = null;
+    editMode = false; editFileAction = null; editNewFile = null; currentEditingJobId = null;
+    document.getElementById('emergencySection').classList.remove('show');
 }
 
 function renderCalendar() {
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
-    
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'];
     document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
-    
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
     const grid = document.getElementById('calendarGrid');
     const headers = grid.querySelectorAll('.calendar-header');
     grid.innerHTML = '';
     headers.forEach(h => grid.appendChild(h));
-    
     for(let i = 0; i < firstDay; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'calendar-day';
-        empty.style.opacity = '0.3';
-        grid.appendChild(empty);
+        const empty = document.createElement('div'); empty.className = 'calendar-day'; empty.style.opacity = '0.3'; grid.appendChild(empty);
     }
-    
     for(let day = 1; day <= daysInMonth; day++) {
-        const dayEl = document.createElement('div');
-        dayEl.className = 'calendar-day';
-        
+        const dayEl = document.createElement('div'); dayEl.className = 'calendar-day';
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        
         const jobsOnDay = state.jobs.filter(j => {
             if(!j.date) return false;
-            if(j.endDate) {
-                return dateStr >= j.date && dateStr <= j.endDate;
-            }
+            if(j.endDate) return dateStr >= j.date && dateStr <= j.endDate;
             return j.date === dateStr;
         });
-        
-        dayEl.innerHTML = `
-            <div class="calendar-day-number">${day}</div>
-            ${jobsOnDay.map(j => {
-                const displayText = j.assignedTo 
-                    ? `${j.assignedTo}${j.outsider ? ' / ' + j.outsider : ''}: ${j.client.substring(0, 12)}`
-                    : j.client.substring(0, 15);
-                return `
-                <div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client}">
-                    ${displayText}${displayText.length < (j.assignedTo ? j.assignedTo.length + j.client.length : j.client.length) ? '...' : ''}
-                </div>`;
-            }).join('')}
-        `;
-        
+        dayEl.innerHTML = `<div class="calendar-day-number">${day}</div>${jobsOnDay.map(j => {
+            let bgColor = INSTALLER_COLORS['Pending'];
+            if(j.isPriority) bgColor = '#000000';
+            else if(j.status === 'Assigned' && j.assignedTo) bgColor = INSTALLER_COLORS[j.assignedTo] || INSTALLER_COLORS['Default'];
+            const displayText = j.assignedTo ? `${j.assignedTo}: ${j.client.substring(0, 10)}` : j.client.substring(0, 15);
+            return `<div class="calendar-event" onclick="viewDetails(${j.id})" title="${j.client} - ${j.assignedTo || 'Pending'}" style="background-color: ${bgColor}; border-left: 3px solid rgba(255,255,255,0.2);">${displayText}${displayText.length < (j.client.length) ? '...' : ''}</div>`;
+        }).join('')}`;
         grid.appendChild(dayEl);
     }
 }
 
 function renderUpcomingJobs() {
     const today = new Date().toISOString().split('T')[0];
-    const upcoming = state.jobs
-        .filter(j => j.date >= today && j.status === 'Assigned')
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .slice(0, 10);
+    const pendingJobs = state.jobs.filter(j => j.status === 'Pending').sort((a, b) => a.date.localeCompare(b.date));
+    const assignedJobs = state.jobs.filter(j => j.status === 'Assigned' && j.date >= today).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 10);
     
-    const container = document.getElementById('upcomingJobs');
-    if(upcoming.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-light);">No upcoming assigned jobs</div>';
-        return;
-    }
-    
-    container.innerHTML = upcoming.map(j => `
-        <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); gap: 12px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 200px;">
-                <div style="font-weight:700; color:var(--primary)">${j.client}</div>
-                <div style="font-size:0.85rem; color:var(--text-light)">
-                    👤 ${j.assignedTo}${j.outsider ? ' + ' + j.outsider : ''} • ${j.date}${j.endDate ? ' → ' + j.endDate : ''}
-                    ${j.wbqRate ? ` • ⭐ ${j.wbqRate}/10` : ''}
-                </div>
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="viewDetails(${j.id})">View</button>
-        </div>
-    `).join('');
+    const pendingContainer = document.getElementById('upcomingPendingJobs');
+    if(pendingJobs.length === 0) pendingContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-light);">No pending jobs</div>';
+    else pendingContainer.innerHTML = pendingJobs.map(j => `<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); gap: 12px; flex-wrap: wrap; background: #FFF7ED; border-left: 4px solid #C2410C;"><div style="flex: 1; min-width: 150px;"><div style="font-weight:700; color:var(--primary)">${j.client}</div><div style="font-size:0.85rem; color:var(--text-light)">📅 ${j.date} • ${j.address}</div></div><button class="btn btn-primary btn-sm" onclick="startRotation(${j.id})">→ Assign</button></div>`).join('');
+
+    const assignedContainer = document.getElementById('upcomingAssignedJobs');
+    if(assignedJobs.length === 0) assignedContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-light);">No upcoming assigned jobs</div>';
+    else assignedContainer.innerHTML = assignedJobs.map(j => {
+        let bgColor = INSTALLER_COLORS[j.assignedTo] || INSTALLER_COLORS['Default'];
+        if(j.isPriority) bgColor = '#000000';
+        return `<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--border); gap: 12px; flex-wrap: wrap; border-left: 4px solid ${bgColor};"><div style="flex: 1; min-width: 150px;"><div style="font-weight:700; color:var(--primary)">${j.client}</div><div style="font-size:0.85rem; color:var(--text-light)"><span style="color:${bgColor}; font-weight:700;">${j.assignedTo}</span> • ${j.date} ${j.isPriority ? '<span style="background:#000; color:#fff; padding:2px 6px; border-radius:10px; font-size:0.65rem; margin-left:6px;">PRIORITY</span>' : ''}</div></div><button class="btn btn-outline btn-sm" onclick="viewDetails(${j.id})">View</button></div>`;
+    }).join('');
 }
 
-document.getElementById('btnPrevMonth').addEventListener('click', () => {
-    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-    renderCalendar();
-});
-
-document.getElementById('btnNextMonth').addEventListener('click', () => {
-    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-    renderCalendar();
-});
+document.getElementById('btnPrevMonth').addEventListener('click', () => { currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1); renderCalendar(); });
+document.getElementById('btnNextMonth').addEventListener('click', () => { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1); renderCalendar(); });
 
 function updateStats() {
     const total = state.jobs.length;
     const pending = state.jobs.filter(j => j.status === 'Pending').length;
     const assigned = state.jobs.filter(j => j.status === 'Assigned').length;
-    
     const totalResponses = state.history.length;
     const acceptedResponses = state.history.filter(h => h.response === 'YES').length;
     const acceptRate = totalResponses > 0 ? Math.round((acceptedResponses / totalResponses) * 100) : 0;
-    
     const ratedJobs = state.jobs.filter(j => j.wbqRate !== null && j.wbqRate !== undefined);
     const totalWBQ = ratedJobs.reduce((sum, j) => sum + j.wbqRate, 0);
     const avgWBQ = ratedJobs.length > 0 ? (totalWBQ / ratedJobs.length).toFixed(1) : '-';
@@ -2315,27 +2320,107 @@ let acceptanceChartInstance = null;
 let wbqInstallerChartInstance = null;
 let wbqMaterialChartInstance = null;
 let wbqTrendChartInstance = null;
+let performanceScatterChartInstance = null;
+let skillChartInstance = null; // NEW CHART INSTANCE
 
 function renderFilters() {
     const container = document.getElementById('chartFilters');
     container.innerHTML = INSTALLERS.map(ins => {
         const isActive = visibleInstallers.has(ins.id);
-        return `
-        <div class="filter-chip ${isActive?'active':''}" onclick="toggleFilter(${ins.id})">
-            <span class="chip-dot" style="background:${isActive?'#fff':'#999'}"></span>
-            ${ins.name}
-        </div>`;
+        return `<div class="filter-chip ${isActive?'active':''}" onclick="toggleFilter(${ins.id})"><span class="chip-dot" style="background:${isActive?'#fff':'#999'}"></span>${ins.name}</div>`;
     }).join('');
 }
 
 window.toggleFilter = function(id) {
-    if(visibleInstallers.has(id)) {
-        if(visibleInstallers.size > 1) visibleInstallers.delete(id);
-    } else {
-        visibleInstallers.add(id);
-    }
+    if(visibleInstallers.has(id)) { if(visibleInstallers.size > 1) visibleInstallers.delete(id); } else { visibleInstallers.add(id); }
     renderFilters();
     updateCharts();
+}
+
+// NEW: FUNCTION TO UPDATE SKILL CHART
+function updateSkillChart() {
+    const ctx = document.getElementById('skillChart').getContext('2d');
+    if(skillChartInstance) skillChartInstance.destroy();
+    
+    const selectedInstallerName = document.getElementById('skillInstallerSelect').value;
+    const selectedCategory = document.getElementById('skillCategorySelect').value;
+    
+    if(!selectedInstallerName) return; 
+    
+    const installerColor = INSTALLER_COLORS[selectedInstallerName] || '#666';
+    
+    // Calculate average scores per material
+    const materialScores = {};
+    const materialCounts = {};
+    
+    state.jobs.forEach(j => {
+        if(j.assignedTo === selectedInstallerName && j.wbqRate && j.materialType) {
+            
+            // Check Category Filter
+            const cat = getMaterialCategory(j.materialType);
+            if(selectedCategory !== 'All' && cat !== selectedCategory) return;
+
+            const name = j.materialType.includes(' - ') ? j.materialType.split(' - ')[1] : j.materialType;
+            
+            if(!materialScores[name]) { materialScores[name] = 0; materialCounts[name] = 0; }
+            materialScores[name] += j.wbqRate;
+            materialCounts[name]++;
+        }
+    });
+    
+    // Prepare data arrays
+    const labels = Object.keys(materialScores);
+    const data = labels.map(name => (materialScores[name] / materialCounts[name]).toFixed(1));
+    
+    // Sort by Score descending
+    const zipped = labels.map((label, i) => ({ label, score: data[i] }));
+    zipped.sort((a, b) => b.score - a.score);
+    
+    const sortedLabels = zipped.map(z => z.label);
+    const sortedData = zipped.map(z => z.score);
+
+    if(sortedLabels.length === 0) {
+        // Empty state for chart
+        skillChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['No Rated Jobs'], datasets: [{ label: 'Score', data: [0], backgroundColor: '#eee' }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+        });
+        return;
+    }
+
+    skillChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedLabels,
+            datasets: [{
+                label: `Avg WBQ (${selectedInstallerName})`,
+                data: sortedData,
+                backgroundColor: installerColor,
+                borderColor: installerColor,
+                borderWidth: 1,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { beginAtZero: true, max: 10, title: { display: true, text: 'WBQ Score (1-10)' } }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw}/10`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function updateCharts() {
@@ -2344,11 +2429,7 @@ function updateCharts() {
 
     const filteredInstallers = INSTALLERS.filter(i => visibleInstallers.has(i.id));
     const labels = filteredInstallers.map(i => i.name);
-
-    const dataPersonalSI = [];
-    const dataReemplazoSI = [];
-    const dataPersonalNO = [];
-    const dataReemplazoNO = [];
+    const dataPersonalSI = [], dataReemplazoSI = [], dataPersonalNO = [], dataReemplazoNO = [], dataPrioritySI = [];
 
     filteredInstallers.forEach(ins => {
         const events = state.history.filter(h => h.installerId === ins.id);
@@ -2356,6 +2437,7 @@ function updateCharts() {
         dataReemplazoSI.push(events.filter(h => h.response==='YES' && h.type==='REPLACEMENT').length);
         dataPersonalNO.push(events.filter(h => h.response==='NO' && h.type==='NORMAL').length);
         dataReemplazoNO.push(events.filter(h => h.response==='NO' && h.type==='REPLACEMENT').length);
+        dataPrioritySI.push(events.filter(h => h.response==='YES' && h.type==='PRIORITY').length);
     });
 
     chartInstance = new Chart(ctx, {
@@ -2366,281 +2448,170 @@ function updateCharts() {
                 { label: 'Personal YES', data: dataPersonalSI, backgroundColor: '#10B981' },
                 { label: 'Replacement YES', data: dataReemplazoSI, backgroundColor: '#009B77' },
                 { label: 'Personal NO', data: dataPersonalNO, backgroundColor: '#EF4444' },
-                { label: 'Replacement NO', data: dataReemplazoNO, backgroundColor: '#991B1B' }
+                { label: 'Replacement NO', data: dataReemplazoNO, backgroundColor: '#991B1B' },
+                { label: 'Priority YES', data: dataPrioritySI, backgroundColor: '#000000' }
             ]
         },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { stacked: true, grid: { color: '#f3f4f6' } },
-                y: { stacked: true, grid: { display: false } }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid: { color: '#f3f4f6' } }, y: { stacked: true, grid: { display: false } } }, plugins: { legend: { display: false } } }
     });
 
+    // --- MATERIAL DISTRIBUTION CHART WITH FILTER ---
     const ctx2 = document.getElementById('materialCategoryChart').getContext('2d');
     if(materialCategoryChartInstance) materialCategoryChartInstance.destroy();
 
-    const categoryCounts = { Wall: 0, Ceiling: 0, Screen: 0 };
-    state.jobs.forEach(j => {
-        const category = getMaterialCategory(j.materialType);
-        if (category && categoryCounts.hasOwnProperty(category)) {
-            categoryCounts[category]++;
-        }
-    });
+    const distFilter = document.getElementById('materialDistFilter').value;
+    let distLabels = [], distData = [], distColors = [];
+
+    if (distFilter === 'All') {
+        const counts = { Wall: 0, Ceiling: 0, Screen: 0 };
+        state.jobs.forEach(j => { const c = getMaterialCategory(j.materialType); if(c && counts.hasOwnProperty(c)) counts[c]++; });
+        distLabels = ['Wall Acoustic', 'Ceiling Acoustic', 'Screen Acoustic'];
+        distData = [counts.Wall, counts.Ceiling, counts.Screen];
+        distColors = ['#3B82F6', '#F59E0B', '#8B5CF6'];
+    } else {
+        const materialCounts = {};
+        state.jobs.forEach(j => {
+            const cat = getMaterialCategory(j.materialType);
+            if (cat === distFilter) {
+                const subName = j.materialType.split(' - ')[1] || j.materialType;
+                materialCounts[subName] = (materialCounts[subName] || 0) + 1;
+            }
+        });
+        distLabels = Object.keys(materialCounts);
+        distData = Object.values(materialCounts);
+        distColors = distLabels.map((_, i) => `hsl(${ (i * 360) / distLabels.length }, 70%, 50%)`);
+        
+        if(distLabels.length === 0) { distLabels = ['No Data']; distData = [0]; distColors = ['#ddd']; }
+    }
 
     materialCategoryChartInstance = new Chart(ctx2, {
         type: 'doughnut',
-        data: {
-            labels: ['Wall Acoustic', 'Ceiling Acoustic', 'Screen Acoustic'],
-            datasets: [{
-                data: [categoryCounts.Wall, categoryCounts.Ceiling, categoryCounts.Screen],
-                backgroundColor: ['#3B82F6', '#F59E0B', '#8B5CF6']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
+        data: { labels: distLabels, datasets: [{ data: distData, backgroundColor: distColors }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
     const ctx3 = document.getElementById('acceptanceChart').getContext('2d');
     if(acceptanceChartInstance) acceptanceChartInstance.destroy();
-
     const acceptanceData = INSTALLERS.map(ins => {
         const events = state.history.filter(h => h.installerId === ins.id);
-        const total = events.length;
         const accepted = events.filter(h => h.response === 'YES').length;
-        return total > 0 ? Math.round((accepted / total) * 100) : 0;
+        return events.length > 0 ? Math.round((accepted / events.length) * 100) : 0;
     });
-
     acceptanceChartInstance = new Chart(ctx3, {
         type: 'bar',
-        data: {
-            labels: INSTALLERS.map(i => i.name),
-            datasets: [{
-                label: 'Acceptance Rate (%)',
-                data: acceptanceData,
-                backgroundColor: '#009B77'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '%';
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
+        data: { labels: INSTALLERS.map(i => i.name), datasets: [{ label: 'Acceptance Rate (%)', data: acceptanceData, backgroundColor: INSTALLERS.map(i => INSTALLER_COLORS[i.name]) }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }, plugins: { legend: { display: false } } }
     });
 
     const ctx4 = document.getElementById('wbqInstallerChart').getContext('2d');
     if(wbqInstallerChartInstance) wbqInstallerChartInstance.destroy();
-
     const wbqByInstaller = INSTALLERS.map(ins => {
         const jobs = state.jobs.filter(j => j.assignedTo === ins.name && j.wbqRate);
         if (jobs.length === 0) return 0;
-        const total = jobs.reduce((sum, j) => sum + j.wbqRate, 0);
-        return (total / jobs.length).toFixed(1);
+        return (jobs.reduce((s, j) => s + j.wbqRate, 0) / jobs.length).toFixed(1);
     });
-
     wbqInstallerChartInstance = new Chart(ctx4, {
         type: 'bar',
-        data: {
-            labels: INSTALLERS.map(i => i.name),
-            datasets: [{
-                label: 'Average WBQ Rate',
-                data: wbqByInstaller,
-                backgroundColor: '#10B981'
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 10,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '/10';
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
+        data: { labels: INSTALLERS.map(i => i.name), datasets: [{ label: 'Average WBQ Rate', data: wbqByInstaller, backgroundColor: INSTALLERS.map(i => INSTALLER_COLORS[i.name]) }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, max: 10, ticks: { callback: v => v + '/10' } } }, plugins: { legend: { display: false } } }
     });
 
+    // --- WBQ MATERIAL CHART WITH FILTER ---
     const ctx5 = document.getElementById('wbqMaterialChart').getContext('2d');
     if(wbqMaterialChartInstance) wbqMaterialChartInstance.destroy();
 
-    const wbqByCategory = { Wall: [], Ceiling: [], Screen: [] };
-    state.jobs.forEach(j => {
-        if (j.wbqRate) {
-            const category = getMaterialCategory(j.materialType);
-            if (category && wbqByCategory[category]) {
-                wbqByCategory[category].push(j.wbqRate);
-            }
-        }
-    });
+    const wbqFilter = document.getElementById('materialWBQFilter').value;
+    let wbqLabels = [], wbqData = [], wbqColors = [];
 
-    const avgWBQByCategory = {
-        Wall: wbqByCategory.Wall.length > 0 ? (wbqByCategory.Wall.reduce((a, b) => a + b, 0) / wbqByCategory.Wall.length).toFixed(1) : 0,
-        Ceiling: wbqByCategory.Ceiling.length > 0 ? (wbqByCategory.Ceiling.reduce((a, b) => a + b, 0) / wbqByCategory.Ceiling.length).toFixed(1) : 0,
-        Screen: wbqByCategory.Screen.length > 0 ? (wbqByCategory.Screen.reduce((a, b) => a + b, 0) / wbqByCategory.Screen.length).toFixed(1) : 0
-    };
+    if (wbqFilter === 'All') {
+        const wbqCats = { Wall: [], Ceiling: [], Screen: [] };
+        state.jobs.forEach(j => { if(j.wbqRate) { const c = getMaterialCategory(j.materialType); if(c && wbqCats[c]) wbqCats[c].push(j.wbqRate); }});
+        wbqLabels = ['Wall Acoustic', 'Ceiling Acoustic', 'Screen Acoustic'];
+        wbqData = [
+            wbqCats.Wall.length ? (wbqCats.Wall.reduce((a,b)=>a+b,0)/wbqCats.Wall.length).toFixed(1) : 0,
+            wbqCats.Ceiling.length ? (wbqCats.Ceiling.reduce((a,b)=>a+b,0)/wbqCats.Ceiling.length).toFixed(1) : 0,
+            wbqCats.Screen.length ? (wbqCats.Screen.reduce((a,b)=>a+b,0)/wbqCats.Screen.length).toFixed(1) : 0
+        ];
+        wbqColors = ['#3B82F6', '#F59E0B', '#8B5CF6'];
+    } else {
+        const matScores = {};
+        state.jobs.forEach(j => {
+            if (j.wbqRate) {
+                const cat = getMaterialCategory(j.materialType);
+                if (cat === wbqFilter) {
+                    const subName = j.materialType.split(' - ')[1] || j.materialType;
+                    if(!matScores[subName]) matScores[subName] = [];
+                    matScores[subName].push(j.wbqRate);
+                }
+            }
+        });
+        wbqLabels = Object.keys(matScores);
+        wbqData = wbqLabels.map(l => (matScores[l].reduce((a,b)=>a+b,0)/matScores[l].length).toFixed(1));
+        wbqColors = wbqLabels.map((_, i) => `hsl(${ (i * 360) / wbqLabels.length }, 70%, 50%)`);
+        
+        if(wbqLabels.length === 0) { wbqLabels = ['No Data']; wbqData = [0]; wbqColors = ['#ddd']; }
+    }
 
     wbqMaterialChartInstance = new Chart(ctx5, {
         type: 'doughnut',
-        data: {
-            labels: ['Wall Acoustic', 'Ceiling Acoustic', 'Screen Acoustic'],
-            datasets: [{
-                data: [avgWBQByCategory.Wall, avgWBQByCategory.Ceiling, avgWBQByCategory.Screen],
-                backgroundColor: ['#3B82F6', '#F59E0B', '#8B5CF6']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label + ': ' + context.parsed + '/10';
-                        }
-                    }
-                }
-            }
-        }
+        data: { labels: wbqLabels, datasets: [{ data: wbqData, backgroundColor: wbqColors }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + '/10' } } } }
+    });
+    
+    // SCATTER PLOT
+    const ctxScatter = document.getElementById('performanceScatterChart').getContext('2d');
+    if(performanceScatterChartInstance) performanceScatterChartInstance.destroy();
+    const scatterData = INSTALLERS.map(ins => {
+        const events = state.history.filter(h => h.installerId === ins.id);
+        const accepted = events.filter(h => h.response === 'YES').length;
+        const rateX = events.length > 0 ? Math.round((accepted / events.length) * 100) : 0;
+        const jobs = state.jobs.filter(j => j.assignedTo === ins.name && j.wbqRate);
+        const avgY = jobs.length > 0 ? (jobs.reduce((s, j) => s + j.wbqRate, 0) / jobs.length).toFixed(1) : 0;
+        const r = 5 + (jobs.length * 1.5); 
+        return { x: rateX, y: avgY, installerName: ins.name, r: r < 5 ? 5 : (r > 20 ? 20 : r) };
+    });
+    performanceScatterChartInstance = new Chart(ctxScatter, {
+        type: 'bubble',
+        data: { datasets: scatterData.map(d => ({ label: d.installerName, data: [{x: d.x, y: d.y, r: d.r}], backgroundColor: INSTALLER_COLORS[d.installerName], borderColor: '#fff', borderWidth: 1 })) },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Acceptance Rate (%)' }, min: 0, max: 105 }, y: { title: { display: true, text: 'Avg WBQ Score (1-10)' }, min: 0, max: 11 } }, plugins: { tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.raw.y}/10 WBQ (${c.raw.x}% Accept)` } }, legend: { position: 'bottom' } } }
     });
 
     updateWBQTrendChart();
+    updateSkillChart(); // Call new chart function
 }
 
 function updateWBQTrendChart() {
     const ctx6 = document.getElementById('wbqTrendChart').getContext('2d');
     if(wbqTrendChartInstance) wbqTrendChartInstance.destroy();
-
     const ratedJobs = state.jobs.filter(j => j.wbqRate && j.date).sort((a, b) => a.date.localeCompare(b.date));
-    
-    if (ratedJobs.length === 0) {
-        wbqTrendChartInstance = new Chart(ctx6, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Average WBQ Rate',
-                    data: [],
-                    borderColor: '#009B77',
-                    backgroundColor: 'rgba(0, 155, 119, 0.1)',
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 10
-                    }
-                }
-            }
-        });
-        return;
-    }
+    if (ratedJobs.length === 0) { wbqTrendChartInstance = new Chart(ctx6, { type: 'line', data: { labels: [], datasets: [{ label: 'Average WBQ Rate', data: [], borderColor: '#009B77', backgroundColor: 'rgba(0, 155, 119, 0.1)', tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } } } }); return; }
 
     const groupedData = {};
-    
     ratedJobs.forEach(job => {
         const date = new Date(job.date);
         let key;
-        
         if (wbqTrendPeriod === 'weekly') {
             const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
             const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
             const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-            key = `${date.getFullYear()}-W${weekNum}`;
+            const weekString = weekNum < 10 ? '0' + weekNum : weekNum;
+            key = `${date.getFullYear()}-W${weekString}`;
         } else {
-            key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const monthNum = date.getMonth() + 1;
+            const monthString = monthNum < 10 ? '0' + monthNum : monthNum;
+            key = `${date.getFullYear()}-${monthString}`;
         }
-        
-        if (!groupedData[key]) {
-            groupedData[key] = [];
-        }
+        if (!groupedData[key]) groupedData[key] = [];
         groupedData[key].push(job.wbqRate);
     });
 
     const labels = Object.keys(groupedData).sort();
-    const data = labels.map(label => {
-        const rates = groupedData[label];
-        return (rates.reduce((a, b) => a + b, 0) / rates.length).toFixed(1);
-    });
+    const data = labels.map(label => { const rates = groupedData[label]; return (rates.reduce((a, b) => a + b, 0) / rates.length).toFixed(1); });
 
     wbqTrendChartInstance = new Chart(ctx6, {
         type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Average WBQ Rate',
-                data: data,
-                borderColor: '#009B77',
-                backgroundColor: 'rgba(0, 155, 119, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 10,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '/10';
-                        }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Avg: ' + context.parsed.y + '/10';
-                        }
-                    }
-                }
-            }
-        }
+        data: { labels: labels, datasets: [{ label: 'Average WBQ Rate', data: data, borderColor: '#009B77', backgroundColor: 'rgba(0, 155, 119, 0.1)', tension: 0.4, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10, ticks: { callback: v => v + '/10' } } }, plugins: { tooltip: { callbacks: { label: c => 'Avg: ' + c.parsed.y + '/10' } } } }
     });
 }
 
@@ -2655,36 +2626,13 @@ document.querySelectorAll('.time-filter-btn').forEach(btn => {
 
 document.getElementById('btnExportExcel').addEventListener('click', () => {
     if(typeof XLSX === 'undefined') { showToast("Error: Excel library not loaded"); return; }
-    
     const wb = XLSX.utils.book_new();
-
-    const jobsData = state.jobs.map(j => ({
-        ID: j.id,
-        Client: j.client,
-        Address: j.address,
-        MaterialType: j.materialType || '',
-        StartDate: j.date,
-        EndDate: j.endDate || '',
-        Helper: j.outsider || '',
-        WBQRate: j.wbqRate || '',
-        Status: j.status,
-        AssignedTo: j.assignedTo || '',
-        Notes: j.notes
-    }));
+    const jobsData = state.jobs.map(j => ({ ID: j.id, Client: j.client, Address: j.address, MaterialType: j.materialType || '', StartDate: j.date, EndDate: j.endDate || '', Helper: j.outsider || '', WBQRate: j.wbqRate || '', Status: j.status, AssignedTo: j.assignedTo || '', Notes: j.notes }));
     const ws1 = XLSX.utils.json_to_sheet(jobsData);
     XLSX.utils.book_append_sheet(wb, ws1, "Jobs");
-
-    const histData = state.history.map(h => ({
-        GlobalJob: h.work,
-        Installer: h.installerName,
-        Response: h.response,
-        Type: h.type,
-        Notes: h.notes,
-        JobID: h.jobId
-    }));
+    const histData = state.history.map(h => ({ GlobalJob: h.work, Installer: h.installerName, Response: h.response, Type: h.type, Notes: h.notes, JobID: h.jobId }));
     const ws2 = XLSX.utils.json_to_sheet(histData);
     XLSX.utils.book_append_sheet(wb, ws2, "History");
-
     XLSX.writeFile(wb, "Nomadtika_Report.xlsx");
     showToast("📊 Excel downloaded");
 });
